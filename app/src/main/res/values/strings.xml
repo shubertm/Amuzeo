@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Amuzeo</string>
+    <string name="app_name_debug">Amuzeo [Debug]</string>
+    <string name="amuzeo_videos">Videos</string>
+    <string name="amuzeo_folders">Folders</string>
+    <string name="amuzeo_tags">Tags</string>
+    <string name="amuzeo_confirm_exit">Tap back again to exit</string>
+    <string name="amuzeo_no_matches_found">No matches found</string>
+    <string name="amuzeo_wallet_address">Address</string>
+    <string name="amuzeo_copy">Copy</string>
+    <string name="btc_address">BTC</string>
+    <string name="amuzeo_btc">BTC</string>
 </resources>

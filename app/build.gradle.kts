@@ -1,6 +1,9 @@
+import com.android.build.gradle.internal.tasks.factory.dependsOn
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.gradle.ktlint)
 }
 
 android {
@@ -21,11 +24,28 @@ android {
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders.putAll(
+                arrayOf(
+                    "appIcon" to "@mipmap/amuzeo_debug",
+                    "appRoundIcon" to "@mipmap/amuzeo_debug_round",
+                    "appName" to "@string/app_name_debug",
+                ),
+            )
+        }
+
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
+            )
+            manifestPlaceholders.putAll(
+                arrayOf(
+                    "appIcon" to "@mipmap/amuzeo",
+                    "appRoundIcon" to "@mipmap/amuzeo_round",
+                    "appName" to "@string/app_name",
+                ),
             )
         }
     }
@@ -38,6 +58,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -59,6 +80,22 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.navigation)
+
+    implementation(libs.androidx.core.splashscreen)
+
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.common)
+    implementation(libs.androidx.media3.session)
+    implementation(libs.androidx.media3.ui)
+
+    implementation(libs.io.insert.koin)
+    implementation(libs.io.insert.koin.android)
+
+    implementation(libs.io.coil)
+    implementation(libs.io.coil.video)
+    implementation(libs.io.coil.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -67,3 +104,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
+tasks.preBuild.dependsOn("ktlintCheck")
+
+tasks.ktlintCheck.dependsOn("ktlintFormat")

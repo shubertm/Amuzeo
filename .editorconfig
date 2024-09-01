@@ -1,0 +1,36 @@
+# EditorConfig helps developers define and maintain consistent
+# coding styles between different editors and IDEs
+# editorconfig.org
+
+root = true
+
+[*]
+
+indent_style = space
+indent_size = 4
+tab_width = 4
+max_line_length =120
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+
+[*.{kt,kts}]
+
+ktlint_function_naming_ignore_when_annotated_with=Composable
+
+ktlint_standard_import-ordering = enabled
+
+ktlint_standard_no-unused-imports = true
+
+ktlint_standard_multiline-if-else = false
+
+ktlint_standard_no-wildcard-import = true
+
+
+[*.md]
+trim_trailing_whitespace = false
+
+[{*.toml,Cargo.lock,Cargo.toml.orig,Gopkg.lock,Pipfile,poetry.lock}]
+ij_toml_keep_indents_on_empty_lines = false
