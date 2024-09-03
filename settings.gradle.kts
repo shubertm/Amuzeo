@@ -1,24 +1,21 @@
-import groovy.util.logging.Log
 import java.io.FileInputStream
 import java.net.URI
 import java.util.Properties
-import java.util.logging.Logger
 
 var user: String = ""
 var pass: String = ""
 
 Properties().apply {
-    try {
+    val file = rootDir.resolve("github.properties")
+    if (file.exists()) {
         load(
-            FileInputStream(rootDir.resolve("github.properties"))
+            FileInputStream(file)
         )
         user = this["gpr.usr"].toString()
         pass = this["gpr.key"].toString()
-
-    } catch (e: NoSuchFileException) {
-        e.printStackTrace()
     }
 }
+
 
 pluginManagement {
     repositories {
