@@ -32,6 +32,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -67,8 +68,6 @@ fun VideoScreen(
             }
         }
 
-        view.keepScreenOn = true
-
         view.setOnSystemUiVisibilityChangeListener { visibility ->
             videosViewModel.toggleUi(
                 visibility and
@@ -98,6 +97,10 @@ fun VideoScreen(
             view.keepScreenOn = false
             view.setOnSystemUiVisibilityChangeListener(null)
         }
+    }
+
+    SideEffect {
+        view.keepScreenOn = videosViewModel.state.isPlaying
     }
 
     fun onBackPressed() {
@@ -158,15 +161,15 @@ fun VideoScreen(
                         value = videosViewModel.state.progress,
                         onValueChange = { videosViewModel.onSeekTo(it) },
                         modifier =
-                            Modifier
-                                .padding(
-                                    start = 32.dp,
-                                    end = 32.dp,
-                                    bottom = 8.dp,
-                                )
-                                .height(32.dp)
-                                .align(Alignment.BottomCenter),
-                        colors = SliderDefaults.colors(inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer),
+                            Modifier.padding(
+                                start = 32.dp,
+                                end = 32.dp,
+                                bottom = 8.dp,
+                            ).align(Alignment.BottomCenter),
+                        colors =
+                            SliderDefaults.colors(
+                                inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                            ),
                     )
                 } else {
                     Column(
@@ -192,8 +195,7 @@ fun VideoScreen(
                                         start = 32.dp,
                                         end = 32.dp,
                                         bottom = 8.dp,
-                                    )
-                                    .height(32.dp),
+                                    ),
                             colors =
                                 SliderDefaults
                                     .colors(inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer),
@@ -368,7 +370,7 @@ fun PreviewVideoScreen() {
                                     end = 32.dp,
                                     bottom = 8.dp,
                                 )
-                                .height(32.dp)
+                                .height(8.dp)
                                 .align(Alignment.BottomCenter),
                         colors = SliderDefaults.colors(inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer),
                     )

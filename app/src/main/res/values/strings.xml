@@ -8,6 +8,4 @@
     <string name="amuzeo_no_matches_found">No matches found</string>
     <string name="amuzeo_wallet_address">Address</string>
     <string name="amuzeo_copy">Copy</string>
-    <string name="btc_address">BTC</string>
-    <string name="amuzeo_btc">BTC</string>
 </resources>

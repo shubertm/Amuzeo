@@ -96,6 +96,8 @@ dependencies {
     implementation(libs.io.coil.video)
     implementation(libs.io.coil.compose)
 
+    implementation(libs.com.infbyte.amuze)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,3 +1,13 @@
+import java.io.FileInputStream
+import java.net.URI
+import java.util.Properties
+
+val githubProperties = Properties().apply {
+    load(
+        FileInputStream(rootDir.resolve("github.properties"))
+    )
+}
+
 pluginManagement {
     repositories {
         google {
@@ -16,6 +26,15 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
+        maven {
+            name = "GithubPackages"
+            url = URI.create("https://maven.pkg.github.com/shubertm/amuze")
+            credentials {
+                username = githubProperties["gpr.usr"].toString()
+                password = githubProperties["gpr.key"].toString()
+            }
+        }
     }
 }
 
