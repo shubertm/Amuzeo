@@ -1,7 +1,7 @@
 <h1 align="center">Amuzeo</h1>
 <p align="center">
 <a href="https://github.com/shubertm/Amuzeo/actions/workflows/build.yml"> 
-<img src="https://github.com/shuberttm/Amuzeo/actions/workflows/build.yml/badge.svg" alt="build status">
+<img src="https://github.com/shubertm/Amuzeo/actions/workflows/build.yml/badge.svg" alt="build status">
 </a>
 </p>
 
