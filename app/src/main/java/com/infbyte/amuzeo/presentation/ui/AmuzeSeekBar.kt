@@ -25,6 +25,7 @@ fun BoxScope.AmuzeSeekBar(
     onSeekTo: (Float) -> Unit = {},
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+
     Slider(
         value = progress,
         onValueChange = { onSeekTo(it) },
