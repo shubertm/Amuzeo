@@ -104,7 +104,7 @@ fun MainScreen(
         HorizontalPager(
             pagerState,
             Modifier.padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
-            beyondBoundsPageCount = 2,
+            beyondViewportPageCount = 2,
         ) { page ->
             when (page) {
                 0 -> {

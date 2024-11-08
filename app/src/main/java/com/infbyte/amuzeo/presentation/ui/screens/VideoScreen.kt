@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,11 +24,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
@@ -51,8 +49,10 @@ import com.infbyte.amuzeo.R
 import com.infbyte.amuzeo.models.AmuzeoState
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
 import com.infbyte.amuzeo.presentation.theme.onPrimaryLight
+import com.infbyte.amuzeo.presentation.ui.AmuzeSeekBar
 import com.infbyte.amuzeo.presentation.viewmodels.VideosViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoScreen(
     videosViewModel: VideosViewModel,
@@ -131,6 +131,7 @@ fun VideoScreen(
         VideoFrame(videoPlayer = videosViewModel.videoPlayer)
         AnimatedVisibility(visible = videosViewModel.state.isUiVisible) {
             Box(Modifier.fillMaxSize()) {
+                val controlBoxScope = this
                 val config = LocalConfiguration.current
 
                 IconButton(
@@ -157,19 +158,9 @@ fun VideoScreen(
                         onNext = { videosViewModel.onNextVideoClick() },
                         onPrev = { videosViewModel.onPrevVideoClick() },
                     )
-                    Slider(
-                        value = videosViewModel.state.progress,
-                        onValueChange = { videosViewModel.onSeekTo(it) },
-                        modifier =
-                            Modifier.padding(
-                                start = 32.dp,
-                                end = 32.dp,
-                                bottom = 8.dp,
-                            ).align(Alignment.BottomCenter),
-                        colors =
-                            SliderDefaults.colors(
-                                inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
-                            ),
+                    AmuzeSeekBar(
+                        progress = videosViewModel.state.progress,
+                        onSeekTo = { videosViewModel.onSeekTo(it) },
                     )
                 } else {
                     Column(
@@ -186,19 +177,9 @@ fun VideoScreen(
                             onNext = { videosViewModel.onNextVideoClick() },
                             onPrev = { videosViewModel.onPrevVideoClick() },
                         )
-                        Slider(
-                            value = videosViewModel.state.progress,
-                            onValueChange = { videosViewModel.onSeekTo(it) },
-                            modifier =
-                                Modifier
-                                    .padding(
-                                        start = 32.dp,
-                                        end = 32.dp,
-                                        bottom = 8.dp,
-                                    ),
-                            colors =
-                                SliderDefaults
-                                    .colors(inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer),
+                        controlBoxScope.AmuzeSeekBar(
+                            progress = videosViewModel.state.progress,
+                            onSeekTo = { videosViewModel.onSeekTo(it) },
                         )
                     }
                 }
@@ -360,20 +341,7 @@ fun PreviewVideoScreen() {
                 val config = LocalConfiguration.current
                 if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     VerticalVideoController()
-                    Slider(
-                        value = .5f,
-                        onValueChange = {},
-                        modifier =
-                            Modifier
-                                .padding(
-                                    start = 32.dp,
-                                    end = 32.dp,
-                                    bottom = 8.dp,
-                                )
-                                .height(8.dp)
-                                .align(Alignment.BottomCenter),
-                        colors = SliderDefaults.colors(inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer),
-                    )
+                    AmuzeSeekBar()
                 } else {
                     Column(
                         Modifier
@@ -382,22 +350,7 @@ fun PreviewVideoScreen() {
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         HorizontalVideoController()
-                        Slider(
-                            value = .5f,
-                            onValueChange = {},
-                            modifier =
-                                Modifier
-                                    .padding(
-                                        start = 32.dp,
-                                        end = 32.dp,
-                                        bottom = 8.dp,
-                                    )
-                                    .height(32.dp),
-                            colors =
-                                SliderDefaults.colors(
-                                    inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer,
-                                ),
-                        )
+                        this@Box.AmuzeSeekBar()
                     }
                 }
             }

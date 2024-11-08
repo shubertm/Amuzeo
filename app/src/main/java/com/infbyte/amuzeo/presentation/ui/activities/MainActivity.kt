@@ -8,10 +8,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.infbyte.amuze.ui.screens.AboutScreen
+import com.infbyte.amuze.ui.screens.LoadingScreen
+import com.infbyte.amuze.ui.screens.NoMediaPermissionScreen
 import com.infbyte.amuzeo.BuildConfig
 import com.infbyte.amuzeo.R
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
@@ -31,6 +36,7 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(
             AmuzeoContracts.RequestPermissionApi30(),
         ) { isGranted ->
+            videosViewModel.setReadPermGranted(isGranted)
             if (isGranted) {
                 videosViewModel.init()
             }
@@ -40,6 +46,7 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(
             ActivityResultContracts.RequestPermission(),
         ) { isGranted ->
+            videosViewModel.setReadPermGranted(isGranted)
             if (isGranted) {
                 videosViewModel.init()
             }
@@ -49,7 +56,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         if (!videosViewModel.state.isLoaded) {
-            if (!isReadPermissionGranted(this)) {
+            videosViewModel.setReadPermGranted(isReadPermissionGranted(this))
+            if (!videosViewModel.state.isReadPermGranted) {
                 launchPermRequest()
             } else {
                 videosViewModel.init()
@@ -62,6 +70,33 @@ class MainActivity : ComponentActivity() {
         setContent {
             AmuzeoTheme {
                 val navController = rememberNavController()
+                if (!videosViewModel.state.isReadPermGranted) {
+                    videosViewModel.hideSystemBars(LocalView.current)
+                    NoMediaPermissionScreen(
+                        appIcon = R.drawable.amuzeo_foreground,
+                        action = com.infbyte.amuze.R.string.amuze_watch,
+                        onStartAction = { launchPermRequest() },
+                        onExit = { onExit() },
+                        about = { navigateBack ->
+                            AboutScreen(
+                                appName = stringResource(R.string.app_name),
+                                appVersion = BuildConfig.VERSION_NAME,
+                                appIconRes = R.drawable.amuzeo_foreground,
+                                privacyPolicyLinkRes = R.string.amuzeo_privacy_policy,
+                                onNavigateBack = { navigateBack() },
+                            )
+                        },
+                    )
+                    return@AmuzeoTheme
+                }
+
+                if (
+                    videosViewModel.state.isReadPermGranted && !videosViewModel.state.isLoaded
+                ) {
+                    LoadingScreen()
+                    return@AmuzeoTheme
+                }
+
                 NavHost(navController, Screens.MAIN) {
                     composable(Screens.MAIN) {
                         MainScreen(

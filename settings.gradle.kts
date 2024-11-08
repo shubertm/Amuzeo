@@ -37,15 +37,6 @@ dependencyResolutionManagement {
         mavenCentral()
 
         maven {
-            name = "GithubPackages"
-            url = URI.create("https://maven.pkg.github.com/shubertm/amuze")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR") ?: user
-                password = System.getenv("GITHUB_TOKEN") ?: pass
-            }
-        }
-
-        maven {
             name = "GitHubPackages"
             url = URI.create("https://maven.pkg.github.com/ARK-Builders/arklib-android")
             credentials {

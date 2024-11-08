@@ -103,6 +103,10 @@ class VideosViewModel(
         }
     }
 
+    fun setReadPermGranted(granted: Boolean) {
+        state = state.copy(isReadPermGranted = granted)
+    }
+
     fun hideSystemBars(view: View) {
         if (state.isUiVisible) {
             viewModelScope.launch {

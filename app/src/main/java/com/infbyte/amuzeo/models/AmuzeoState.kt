@@ -8,6 +8,7 @@ data class AmuzeoState(
     val isLoaded: Boolean = false,
     val isPlaying: Boolean = false,
     val isUiVisible: Boolean = true,
+    val isReadPermGranted: Boolean = false,
 ) {
     companion object {
         val INITIAL_STATE = AmuzeoState()
