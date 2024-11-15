@@ -114,7 +114,7 @@ fun MainScreen(
                             }
                         }
                         1 -> {
-                            FoldersScreen(videosViewModel.state.folders) {}
+                            FoldersScreen(videosViewModel.state.foldersSearchResult) {}
                         }
                         2 -> {
                             TaggedVideosScreen(
@@ -293,7 +293,6 @@ fun PreviewMainScreen() {
                     )
                 }
             },
-        ) { _ ->
-        }
+        ) {}
     }
 }
