@@ -293,6 +293,8 @@ fun PreviewMainScreen() {
                     )
                 }
             },
-        ) {}
+        ) { padding ->
+            padding.calculateTopPadding()
+        }
     }
 }
