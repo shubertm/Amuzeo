@@ -31,7 +31,6 @@ object AmuzeoContracts {
             intent: Intent?,
         ): Boolean {
             val granted = isReadPermissionGranted(context!!)
-            context = null
             return granted
         }
     }

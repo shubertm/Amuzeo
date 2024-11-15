@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -16,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.infbyte.amuze.ui.screens.AboutScreen
 import com.infbyte.amuze.ui.screens.LoadingScreen
+import com.infbyte.amuze.ui.screens.NoMediaAvailableScreen
 import com.infbyte.amuze.ui.screens.NoMediaPermissionScreen
 import com.infbyte.amuzeo.BuildConfig
 import com.infbyte.amuzeo.R
@@ -69,49 +72,78 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AmuzeoTheme {
-                val navController = rememberNavController()
-                if (!videosViewModel.state.isReadPermGranted) {
-                    videosViewModel.hideSystemBars(LocalView.current)
-                    NoMediaPermissionScreen(
-                        appIcon = R.drawable.amuzeo_foreground,
-                        action = com.infbyte.amuze.R.string.amuze_watch,
-                        onStartAction = { launchPermRequest() },
-                        onExit = { onExit() },
-                        about = { navigateBack ->
-                            AboutScreen(
-                                appName = stringResource(R.string.app_name),
-                                appVersion = BuildConfig.VERSION_NAME,
-                                appIconRes = R.drawable.amuzeo_foreground,
-                                privacyPolicyLinkRes = R.string.amuzeo_privacy_policy,
-                                onNavigateBack = { navigateBack() },
-                            )
-                        },
-                    )
-                    return@AmuzeoTheme
-                }
-
-                if (
-                    videosViewModel.state.isReadPermGranted && !videosViewModel.state.isLoaded
-                ) {
-                    LoadingScreen()
-                    return@AmuzeoTheme
-                }
-
-                NavHost(navController, Screens.MAIN) {
-                    composable(Screens.MAIN) {
-                        MainScreen(
-                            videosViewModel,
-                            onNavigateTo = { route -> navController.navigate(route) },
-                            onNavigateBack = { onExit() },
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    val navController = rememberNavController()
+                    if (!videosViewModel.state.isReadPermGranted) {
+                        videosViewModel.hideSystemBars(LocalView.current)
+                        NoMediaPermissionScreen(
+                            appIcon = R.drawable.amuzeo_intro,
+                            action = com.infbyte.amuze.R.string.amuze_watch,
+                            onStartAction = { launchPermRequest() },
+                            onExit = { onExit() },
+                            aboutApp = { navigateBack ->
+                                AboutScreen(
+                                    appName = stringResource(R.string.app_name),
+                                    appVersion = BuildConfig.VERSION_NAME,
+                                    appIconRes = R.drawable.amuzeo_foreground,
+                                    privacyPolicyLinkRes = R.string.amuzeo_privacy_policy,
+                                    onNavigateBack = { navigateBack() },
+                                )
+                            },
                         )
+                        return@Surface
                     }
-                    composable(Screens.VIDEOS) {}
 
-                    composable(Screens.VIDEO_PLAYBACK) {
-                        VideoScreen(
-                            videosViewModel,
-                            onNavigateBack = { navController.popBackStack() },
+                    if (
+                        (videosViewModel.state.isReadPermGranted && !videosViewModel.state.isLoaded) ||
+                        videosViewModel.state.isRefreshing
+                    ) {
+                        LoadingScreen()
+                        return@Surface
+                    }
+
+                    if (!videosViewModel.state.hasVideos) {
+                        NoMediaAvailableScreen(
+                            R.string.amuzeo_no_videos,
+                            onRefresh = {
+                                if (!videosViewModel.state.isReadPermGranted) {
+                                    launchPermRequest()
+                                } else {
+                                    videosViewModel.setIsRefreshing(true)
+                                    videosViewModel.init()
+                                }
+                            },
+                            onExit = { onExit() },
+                            aboutApp = { navigateBack ->
+                                AboutScreen(
+                                    stringResource(R.string.app_name),
+                                    BuildConfig.VERSION_NAME,
+                                    R.drawable.amuzeo_foreground,
+                                    R.string.amuzeo_privacy_policy_link,
+                                    onNavigateBack = { navigateBack() },
+                                )
+                            },
                         )
+                        return@Surface
+                    }
+
+                    NavHost(navController, Screens.MAIN) {
+                        composable(Screens.MAIN) {
+                            MainScreen(
+                                videosViewModel,
+                                onNavigateTo = { route -> navController.navigate(route) },
+                                onNavigateBack = { onExit() },
+                            )
+                        }
+
+                        composable(Screens.VIDEOS) {}
+
+                        composable(Screens.VIDEO_PLAYBACK) {
+                            VideoScreen(
+                                videosViewModel,
+                                onNavigateBack = { navController.popBackStack() },
+                            )
+                        }
                     }
                 }
             }

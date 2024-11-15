@@ -48,10 +48,22 @@ class VideosViewModel(
                 },
                 onComplete = { videos, folders ->
                     launch {
-                        state = state.copy(videos = videos, folders = folders, isLoaded = true)
-                    }
-                    launch(Dispatchers.Main) {
-                        amuzeoPlayer.createPlaylist(videos.map { it.item })
+                        if (state.isRefreshing && videos.isEmpty()) {
+                            delay(2000)
+                        }
+                        state =
+                            state.copy(
+                                videos = videos,
+                                folders = folders,
+                                videosSearchResult = videos,
+                                foldersSearchResult = folders,
+                                isLoaded = true,
+                                hasVideos = videos.isNotEmpty(),
+                                isRefreshing = false,
+                            )
+                        launch(Dispatchers.Main) {
+                            amuzeoPlayer.createPlaylist(videos.map { it.item })
+                        }
                     }
                 },
             )
@@ -166,6 +178,48 @@ class VideosViewModel(
                 delay(1000)
                 state = state.copy(progress = amuzeoPlayer.getProgress())
             }
+        }
+    }
+
+    fun setIsRefreshing(refresh: Boolean) {
+        state = state.copy(isRefreshing = refresh)
+    }
+
+    fun setIsSearching(searching: Boolean) {
+        state = state.copy(isSearching = searching)
+    }
+
+    fun onSearchVideos(query: String) {
+        viewModelScope.launch {
+            state =
+                with(state) {
+                    copy(
+                        videosSearchResult =
+                            videos.filter { video ->
+                                video.title.contains(query, ignoreCase = true)
+                            },
+                    )
+                }
+        }
+    }
+
+    fun onSearchFolders(query: String) {
+        viewModelScope.launch {
+            state =
+                with(state) {
+                    copy(
+                        foldersSearchResult =
+                            folders.filter { folder ->
+                                folder.name.contains(query, ignoreCase = true)
+                            },
+                    )
+                }
+        }
+    }
+
+    fun setSearchQuery(query: String) {
+        viewModelScope.launch {
+            state = state.copy(searchQuery = query)
         }
     }
 }

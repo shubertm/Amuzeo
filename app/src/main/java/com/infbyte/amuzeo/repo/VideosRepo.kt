@@ -33,8 +33,8 @@ class VideosRepo(private val context: Context) {
     val taggedVideoImageLoader = context.getImageLoader()
 
     suspend fun loadVideos(
-        isLoading: suspend () -> Unit,
-        onComplete: suspend (videos: List<Video>, folders: List<Folder>) -> Unit,
+        isLoading: () -> Unit,
+        onComplete: (videos: List<Video>, folders: List<Folder>) -> Unit,
     ) {
         withContext(Dispatchers.IO) {
             isLoading()

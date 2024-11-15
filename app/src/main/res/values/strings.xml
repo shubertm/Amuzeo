@@ -9,4 +9,7 @@
     <string name="amuzeo_wallet_address">Address</string>
     <string name="amuzeo_copy">Copy</string>
     <string name="amuzeo_privacy_policy" />
+    <string name="amuzeo_search">Search</string>
+    <string name="amuzeo_no_videos">No videos available</string>
+    <string name="amuzeo_privacy_policy_link">https://infbyte,com</string>
 </resources>
