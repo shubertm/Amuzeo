@@ -9,7 +9,7 @@
 
 <p id="app_icon" align="center">
 <img
-    src="https://github.com/shubertm/Amuzeo/blob/main/app/src/main/amuzeo-playstore.png"
+    src="https://github.com/shubertm/Amuzeo/blob/main/app/src/main/amuzeo.svg"
     width="60" height="60" alt="amuzic icon"
     style="border-radius:10px;"/>
 </p>

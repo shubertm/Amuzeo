@@ -101,6 +101,7 @@ fun MainScreen(
                         search()
                     }
                 },
+
                 modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
                 content = {
                     when (pagerState.currentPage) {
