@@ -205,7 +205,7 @@ fun MainScreen(
                 }
                 2 -> {
                     TaggedVideosScreen(
-                        videosViewModel.state.videos.getSubListIfNotEmpty(1, 6),
+                        videosViewModel.state.videos.getSubListIfNotEmpty(1, 2),
                         videosViewModel.taggedVideoImageLoader,
                     ) {}
                 }

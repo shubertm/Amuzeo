@@ -1,6 +1,7 @@
 package com.infbyte.amuzeo.presentation.viewmodels
 
 import android.app.Activity
+import android.util.Log
 import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,6 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
 import coil.ImageLoader
+import com.infbyte.amuzeo.models.AmuzeoSideEffect
 import com.infbyte.amuzeo.models.AmuzeoState
 import com.infbyte.amuzeo.playback.AmuzeoPlayer
 import com.infbyte.amuzeo.repo.VideosRepo
@@ -29,6 +31,9 @@ class VideosViewModel(
     val taggedVideoImageLoader: ImageLoader = videosRepo.taggedVideoImageLoader
 
     var state by mutableStateOf(AmuzeoState.INITIAL_STATE)
+        private set
+
+    var sideEffect by mutableStateOf(AmuzeoSideEffect())
         private set
 
     var confirmExit: Boolean = false
@@ -61,6 +66,7 @@ class VideosViewModel(
                                 hasVideos = videos.isNotEmpty(),
                                 isRefreshing = false,
                             )
+                        sideEffect = sideEffect.copy(showSplash = false)
                         launch(Dispatchers.Main) {
                             amuzeoPlayer.createPlaylist(videos.map { it.item })
                         }
@@ -130,12 +136,23 @@ class VideosViewModel(
         }
     }
 
-    fun hideUi() {
-        state = state.copy(isUiVisible = false)
+    fun showSystemBars(view: View) {
+        viewModelScope.launch {
+            val window = (view.context as Activity).window
+            WindowCompat.getInsetsController(window, view).run {
+                show(WindowInsetsCompat.Type.systemBars())
+            }
+        }
     }
 
-    fun toggleUi(visible: Boolean) {
-        state = state.copy(isUiVisible = visible)
+    fun hideUi() {
+        state = state.copy(isUiVisible = false)
+        Log.d("VIEWMODEL", state.isUiVisible.toString())
+    }
+
+    fun showUi() {
+        state = state.copy(isUiVisible = true)
+        Log.d("VIEWMODEL", state.isUiVisible.toString())
     }
 
     fun cancelDelayHidingUi() {
@@ -145,7 +162,7 @@ class VideosViewModel(
         }
     }
 
-    fun delayHidingUi(view: View) {
+    fun delayHidingUiAndSystemBars(view: View) {
         uiJob =
             viewModelScope.launch {
                 showUi()
@@ -166,10 +183,6 @@ class VideosViewModel(
             delay(2000)
             confirmExit = false
         }
-    }
-
-    private fun showUi() {
-        state = state.copy(isUiVisible = true)
     }
 
     private fun startProgressMonitor() {

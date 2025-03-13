@@ -7,7 +7,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.platform.LocalView
@@ -27,23 +26,11 @@ import com.infbyte.amuzeo.presentation.ui.screens.MainScreen
 import com.infbyte.amuzeo.presentation.ui.screens.Screens
 import com.infbyte.amuzeo.presentation.ui.screens.VideoScreen
 import com.infbyte.amuzeo.presentation.viewmodels.VideosViewModel
-import com.infbyte.amuzeo.utils.AmuzeoContracts
 import com.infbyte.amuzeo.utils.AmuzeoPermissions.isReadPermissionGranted
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
     private val videosViewModel: VideosViewModel by viewModel()
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private val permLauncherAPI30 =
-        registerForActivityResult(
-            AmuzeoContracts.RequestPermissionApi30(),
-        ) { isGranted ->
-            videosViewModel.setReadPermGranted(isGranted)
-            if (isGranted) {
-                videosViewModel.init()
-            }
-        }
 
     private val permLauncher =
         registerForActivityResult(
@@ -64,10 +51,11 @@ class MainActivity : ComponentActivity() {
                 launchPermRequest()
             } else {
                 videosViewModel.init()
-                installSplashScreen().setKeepOnScreenCondition {
-                    !videosViewModel.state.isLoaded
-                }
             }
+        }
+
+        installSplashScreen().setKeepOnScreenCondition {
+            videosViewModel.sideEffect.showSplash
         }
 
         setContent {
@@ -78,7 +66,7 @@ class MainActivity : ComponentActivity() {
                         videosViewModel.hideSystemBars(LocalView.current)
                         NoMediaPermissionScreen(
                             appIcon = R.drawable.amuzeo_intro,
-                            action = com.infbyte.amuze.R.string.amuze_watch,
+                            action = R.string.amuzeo_watch,
                             onStartAction = { launchPermRequest() },
                             onExit = { onExit() },
                             aboutApp = { navigateBack ->
@@ -168,15 +156,15 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun launchPermRequest() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            permLauncherAPI30.launch(
-                "package:${BuildConfig.APPLICATION_ID}",
-            )
-        } else {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             permLauncher.launch(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
             )
+            return
         }
+        permLauncher.launch(
+            Manifest.permission.READ_MEDIA_VIDEO,
+        )
     }
 
     private fun onExit() {

@@ -1,7 +1,7 @@
 package com.infbyte.amuzeo.presentation.ui.screens
 
 import android.content.res.Configuration
-import android.view.View
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -24,12 +24,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +51,6 @@ import com.infbyte.amuzeo.presentation.theme.onPrimaryLight
 import com.infbyte.amuzeo.presentation.ui.AmuzeSeekBar
 import com.infbyte.amuzeo.presentation.viewmodels.VideosViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideoScreen(
     videosViewModel: VideosViewModel,
@@ -60,7 +58,7 @@ fun VideoScreen(
 ) {
     val view = LocalView.current
 
-    DisposableEffect(key1 = "") {
+    /*DisposableEffect(key1 = "") {
         videosViewModel.run {
             if (state.isUiVisible) {
                 videosViewModel.hideSystemBars(view)
@@ -68,35 +66,47 @@ fun VideoScreen(
             }
         }
 
-        view.setOnSystemUiVisibilityChangeListener { visibility ->
-            videosViewModel.toggleUi(
-                visibility and
-                    (View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0,
-            )
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            view.setOnSystemUiVisibilityChangeListener { visibility ->
+                videosViewModel.showUi(
+                    visibility and
+                        (View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0,
+                )
 
-            videosViewModel.run {
-                if (state.isUiVisible) {
-                    cancelDelayHidingUi()
-                    delayHidingUi(view)
+                videosViewModel.run {
+                    if (state.isUiVisible) {
+                        cancelDelayHidingUi()
+                        delayHidingUiAndSystemBars(view)
+                    }
                 }
             }
         }
 
-        /**
-         * Will be needed for Android 11+
-         *
-         * view.setOnApplyWindowInsetsListener { view, insets ->
-         val _insets = view.onApplyWindowInsets(insets)
-         val insetsCompat = WindowInsetsCompat.toWindowInsetsCompat(_insets)
-         val isVisible = insetsCompat.isVisible(WindowInsetsCompat.Type.statusBars())
-         Log.d("Video Screen", "System Bars Visibility = $isVisible")
-         insetsCompat.toWindowInsets()!!
-         }*/
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            ViewCompat.setOnApplyWindowInsetsListener(view) { view, insets ->
+                val isVisible = insets.isVisible(WindowInsetsCompat.Type.statusBars())
+
+                videosViewModel.showUi(isVisible)
+
+                if (isVisible) {
+                    videosViewModel.cancelDelayHidingUi()
+                    videosViewModel.delayHidingUiAndSystemBars(view)
+                }
+
+                ViewCompat.onApplyWindowInsets(view, insets)
+            }
+        }*/
 
         onDispose {
             view.keepScreenOn = false
-            view.setOnSystemUiVisibilityChangeListener(null)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                view.setOnSystemUiVisibilityChangeListener(null)
+            }
         }
+    }*/
+
+    LaunchedEffect("") {
+        videosViewModel.delayHidingUiAndSystemBars(view)
     }
 
     SideEffect {
@@ -115,13 +125,20 @@ fun VideoScreen(
             .background(MaterialTheme.colorScheme.scrim)
             .pointerInput("") {
                 awaitEachGesture {
+                    Log.d("VideoScreen", "Gesture Screen touched")
+
                     if (awaitFirstDown().pressed) {
+                        Log.d("VideoScreen", "Screen touched")
                         videosViewModel.run {
                             cancelDelayHidingUi()
                             if (state.isUiVisible) {
                                 hideSystemBars(view)
                                 hideUi()
+                                return@run
                             }
+                            showUi()
+                            showSystemBars(view)
+                            delayHidingUiAndSystemBars(view)
                         }
                     }
                 }
