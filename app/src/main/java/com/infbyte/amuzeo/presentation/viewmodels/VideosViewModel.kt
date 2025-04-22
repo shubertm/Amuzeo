@@ -2,7 +2,6 @@ package com.infbyte.amuzeo.presentation.viewmodels
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

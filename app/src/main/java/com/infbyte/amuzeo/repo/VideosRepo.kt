@@ -3,7 +3,6 @@ package com.infbyte.amuzeo.repo
 import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
-import android.util.Log
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.infbyte.amuzeo.models.Folder
