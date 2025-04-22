@@ -1,101 +1,129 @@
 package com.infbyte.amuzeo.presentation.ui.screens
 
-import androidx.annotation.OptIn
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.util.UnstableApi
-import coil.ImageLoader
-import coil.compose.AsyncImage
-import com.infbyte.amuzeo.models.Video
-import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
-import com.infbyte.amuzeo.utils.format
-import com.infbyte.amuzeo.utils.getVideoDuration
+import com.infbyte.amuzeo.R
+import com.infbyte.amuzeo.presentation.viewmodels.VideosViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VideosScreen(
-    videos: List<Video>,
-    imageLoader: ImageLoader,
-    onVideoClicked: (Int) -> Unit,
+    videosViewModel: VideosViewModel,
+    onNavigateTo: (String) -> Unit,
+    onNavigateBack: () -> Unit,
 ) {
-    LazyColumn(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        itemsIndexed(videos) { index, video ->
-            Video(video, imageLoader) {
-                onVideoClicked(index)
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+
+    fun search() {
+        videosViewModel.onSearchVideos(searchQuery)
+    }
+
+    Scaffold(
+        Modifier.fillMaxSize(),
+        topBar = {
+            SearchBar(
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = searchQuery,
+                        onQueryChange = { query ->
+                            searchQuery = query
+                            search()
+                        },
+                        onSearch = { query -> },
+                        expanded = videosViewModel.state.isSearching,
+                        onExpandedChange = { isExpanded ->
+                            searchQuery = ""
+                            videosViewModel.setIsSearching(isExpanded)
+                            if (isExpanded) {
+                                search()
+                            }
+                        },
+                        placeholder = { Text(stringResource(R.string.amuzeo_search)) },
+                        leadingIcon = {
+                            IconButton(
+                                onClick = {
+                                    if (videosViewModel.state.isSearching) {
+                                        videosViewModel.setIsSearching(false)
+                                        return@IconButton
+                                    }
+                                    onNavigateBack()
+                                },
+                            ) {
+                                Icon(Icons.AutoMirrored.Outlined.KeyboardArrowLeft, "")
+                            }
+                        },
+                        trailingIcon = {
+                            if (!videosViewModel.state.isSearching) {
+                                Row {
+                                    IconButton(
+                                        onClick = {
+                                            videosViewModel.setIsSearching(true)
+                                        },
+                                    ) { Icon(Icons.Outlined.Search, "") }
+                                    IconButton(
+                                        onClick = { onNavigateTo(Screens.ABOUT) },
+                                    ) { Icon(Icons.Outlined.Info, "") }
+                                }
+                            }
+                        },
+                    )
+                },
+                expanded = videosViewModel.state.isSearching,
+                onExpandedChange = { isExpanded ->
+                    searchQuery = ""
+                    videosViewModel.setIsSearching(isExpanded)
+                    if (isExpanded) {
+                        search()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
+                content = {
+                    Videos(
+                        videosViewModel.state.videosSearchResult,
+                        videosViewModel.videoImageLoader,
+                    ) { video ->
+                        videosViewModel.onVideoClick(video)
+                        onNavigateTo(Screens.VIDEO_PLAYBACK)
+                    }
+                },
+            )
+        },
+    ) { padding ->
+        Box(
+            Modifier.padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
+        ) {
+            Videos(videosViewModel.state.currentVideos, videosViewModel.videoImageLoader) { video ->
+                videosViewModel.onVideoClick(video)
+                onNavigateTo(Screens.VIDEO_PLAYBACK)
             }
         }
     }
-}
 
-@OptIn(UnstableApi::class)
-@Preview
-@Composable
-fun Video(
-    video: Video = Video.EMPTY,
-    imageLoader: ImageLoader = ImageLoader(LocalContext.current),
-    onClick: () -> Unit = {},
-) {
-    val context = LocalContext.current
-    val videoUri = remember { video.item.localConfiguration?.uri }
-
-    Row(
-        Modifier.padding(8.dp).fillMaxWidth().clip(RoundedCornerShape(10))
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AsyncImage(
-            model = video.thumbnailRequest,
-            imageLoader = imageLoader,
-            contentDescription = "",
-            modifier =
-                Modifier
-                    .padding(8.dp)
-                    .size(96.dp, 62.dp)
-                    .clip(RoundedCornerShape(10))
-                    .background(MaterialTheme.colorScheme.onBackground),
-            contentScale = ContentScale.Crop,
-        )
-        Column(Modifier.padding(8.dp)) {
-            Text(
-                video.item.mediaMetadata.title.toString(),
-                style = MaterialTheme.typography.bodyLarge,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
-            Text(
-                context.getVideoDuration(videoUri).format(),
-                style = MaterialTheme.typography.bodySmall,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewVideosScreen() {
-    AmuzeoTheme {
-        VideosScreen(listOf(Video.EMPTY, Video.EMPTY), ImageLoader(LocalContext.current), {})
+    BackHandler {
+        onNavigateBack()
     }
 }

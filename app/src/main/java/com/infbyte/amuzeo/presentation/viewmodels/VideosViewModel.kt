@@ -1,6 +1,7 @@
 package com.infbyte.amuzeo.presentation.viewmodels
 
 import android.app.Activity
+import android.content.Context
 import android.util.Log
 import android.view.View
 import androidx.compose.runtime.getValue
@@ -14,8 +15,14 @@ import androidx.media3.common.Player
 import coil.ImageLoader
 import com.infbyte.amuzeo.models.AmuzeoSideEffect
 import com.infbyte.amuzeo.models.AmuzeoState
+import com.infbyte.amuzeo.models.Folder
+import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.playback.AmuzeoPlayer
+import com.infbyte.amuzeo.repo.TagsRepo
 import com.infbyte.amuzeo.repo.VideosRepo
+import dev.arkbuilders.arklib.ResourceId
+import dev.arkbuilders.arklib.user.tags.Tag
+import dev.arkbuilders.arklib.user.tags.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -24,6 +31,7 @@ import kotlinx.coroutines.launch
 class VideosViewModel(
     private val amuzeoPlayer: AmuzeoPlayer,
     private val videosRepo: VideosRepo,
+    private val tagsRepo: TagsRepo,
 ) : ViewModel() {
     val videoPlayer: Player? = amuzeoPlayer.getPlayer()
 
@@ -41,7 +49,7 @@ class VideosViewModel(
 
     private var uiJob: Job? = null
 
-    fun init() {
+    fun init(context: Context) {
         amuzeoPlayer.isPlayingChanged = { isPlaying ->
             state = state.copy(isPlaying = isPlaying)
             startProgressMonitor()
@@ -51,16 +59,37 @@ class VideosViewModel(
                 isLoading = {
                     amuzeoPlayer.init()
                 },
-                onComplete = { videos, folders ->
+                onComplete = { videos, folders, ids ->
                     launch {
+                        launch {
+                            tagsRepo.init(context.filesDir.toPath(), ids) { tags ->
+                                val taggedVideos =
+                                    videos.map { video ->
+                                        video.addTags(tags = tagsRepo.readTags(video.resourceId))
+                                        video
+                                    }
+
+                                state =
+                                    state.copy(
+                                        videos = taggedVideos,
+                                        allTags = tags,
+                                        taggedVideos = taggedVideos,
+                                        taggedVideosSearchResult = taggedVideos,
+                                    )
+                            }
+                        }
+
                         if (state.isRefreshing && videos.isEmpty()) {
                             delay(2000)
                         }
                         state =
                             state.copy(
                                 videos = videos,
+                                currentVideos = videos,
                                 folders = folders,
                                 videosSearchResult = videos,
+                                taggedVideos = videos,
+                                taggedVideosSearchResult = videos,
                                 foldersSearchResult = folders,
                                 isLoaded = true,
                                 hasVideos = videos.isNotEmpty(),
@@ -76,12 +105,24 @@ class VideosViewModel(
         }
     }
 
-    fun onVideoClick(index: Int) {
-        val video = state.videos[index]
+    fun onVideoClick(video: Video) {
         if (state.currentVideo != video) {
             state = state.copy(currentVideo = video)
+            amuzeoPlayer.createPlaylist(state.currentVideos.map { it.item })
         }
+        val index = state.currentVideos.indexOf(video)
         amuzeoPlayer.selectVideo(index)
+    }
+
+    fun onFolderClick(folder: Folder) {
+        state =
+            with(state) {
+                val videosInFolder =
+                    videos.filter { video ->
+                        video.folder == folder.name
+                    }
+                copy(currentVideos = videosInFolder)
+            }
     }
 
     fun onPlayPauseClick() {
@@ -121,6 +162,48 @@ class VideosViewModel(
         }
     }
 
+    fun onTagVideo(
+        id: ResourceId,
+        tags: Tags,
+    ) {
+        viewModelScope.launch {
+            tagsRepo.writeTags(id, tags)
+            state =
+                with(state) {
+                    val mutableTags = allTags.toMutableSet()
+                    mutableTags.addAll(tags)
+                    copy(allTags = mutableTags)
+                }
+        }
+    }
+
+    fun addToFilterTags(tag: Tag) {
+        state =
+            with(state) {
+                val mutableTags = filterTags.toMutableSet()
+                if (mutableTags.contains(tag)) {
+                    mutableTags.remove(tag)
+                    return@with copy(filterTags = mutableTags)
+                }
+                mutableTags.add(tag)
+                copy(filterTags = mutableTags)
+            }
+    }
+
+    fun filterVideosWithTags() {
+        state =
+            with(state) {
+                if (filterTags.isEmpty()) {
+                    return@with copy(taggedVideos = videos)
+                }
+                val videos =
+                    videos.filter { video: Video ->
+                        video.tags.any { tag -> filterTags.contains(tag) }
+                    }
+                copy(taggedVideos = videos)
+            }
+    }
+
     fun setReadPermGranted(granted: Boolean) {
         state = state.copy(isReadPermGranted = granted)
     }
@@ -147,12 +230,10 @@ class VideosViewModel(
 
     fun hideUi() {
         state = state.copy(isUiVisible = false)
-        Log.d("VIEWMODEL", state.isUiVisible.toString())
     }
 
     fun showUi() {
         state = state.copy(isUiVisible = true)
-        Log.d("VIEWMODEL", state.isUiVisible.toString())
     }
 
     fun cancelDelayHidingUi() {
@@ -208,7 +289,7 @@ class VideosViewModel(
                 with(state) {
                     copy(
                         videosSearchResult =
-                            videos.filter { video ->
+                            currentVideos.filter { video ->
                                 video.title.contains(query, ignoreCase = true)
                             },
                     )
