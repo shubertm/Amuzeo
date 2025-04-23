@@ -25,6 +25,7 @@ import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
 import com.infbyte.amuzeo.presentation.ui.screens.MainScreen
 import com.infbyte.amuzeo.presentation.ui.screens.Screens
 import com.infbyte.amuzeo.presentation.ui.screens.VideoScreen
+import com.infbyte.amuzeo.presentation.ui.screens.VideosScreen
 import com.infbyte.amuzeo.presentation.viewmodels.VideosViewModel
 import com.infbyte.amuzeo.utils.AmuzeoPermissions.isReadPermissionGranted
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -38,7 +39,7 @@ class MainActivity : ComponentActivity() {
         ) { isGranted ->
             videosViewModel.setReadPermGranted(isGranted)
             if (isGranted) {
-                videosViewModel.init()
+                videosViewModel.init(this)
             }
         }
 
@@ -50,7 +51,7 @@ class MainActivity : ComponentActivity() {
             if (!videosViewModel.state.isReadPermGranted) {
                 launchPermRequest()
             } else {
-                videosViewModel.init()
+                videosViewModel.init(this)
             }
         }
 
@@ -98,7 +99,7 @@ class MainActivity : ComponentActivity() {
                                     launchPermRequest()
                                 } else {
                                     videosViewModel.setIsRefreshing(true)
-                                    videosViewModel.init()
+                                    videosViewModel.init(this)
                                 }
                             },
                             onExit = { onExit() },
@@ -124,13 +125,28 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable(Screens.VIDEOS) {}
+                        composable(Screens.VIDEOS) {
+                            VideosScreen(
+                                videosViewModel,
+                                onNavigateTo = { navController.navigate(it) },
+                                onNavigateBack = { navController.popBackStack() },
+                            )
+                        }
 
                         composable(Screens.VIDEO_PLAYBACK) {
                             VideoScreen(
                                 videosViewModel,
                                 onNavigateBack = { navController.popBackStack() },
                             )
+                        }
+
+                        composable(Screens.ABOUT) {
+                            AboutScreen(
+                                stringResource(R.string.app_name),
+                                BuildConfig.VERSION_NAME,
+                                R.drawable.ic_amuzeo_splash,
+                                R.string.amuzeo_privacy_policy_link,
+                            ) { navController.popBackStack() }
                         }
                     }
                 }

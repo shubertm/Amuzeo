@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,9 +34,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.infbyte.amuzeo.R
+import com.infbyte.amuzeo.models.Folder
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
 import com.infbyte.amuzeo.presentation.viewmodels.VideosViewModel
-import com.infbyte.amuzeo.utils.getSubListIfNotEmpty
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +86,9 @@ fun MainScreen(
                                             videosViewModel.setIsSearching(true)
                                         },
                                     ) { Icon(Icons.Outlined.Search, "") }
-                                    IconButton(onClick = {}) { Icon(Icons.Outlined.Info, "") }
+                                    IconButton(
+                                        onClick = { onNavigateTo(Screens.ABOUT) },
+                                    ) { Icon(Icons.Outlined.Info, "") }
                                 }
                             }
                         },
@@ -105,22 +106,32 @@ fun MainScreen(
                 content = {
                     when (pagerState.currentPage) {
                         0 -> {
-                            VideosScreen(
-                                videosViewModel.state.videosSearchResult,
-                                videosViewModel.videoImageLoader,
-                            ) { index ->
-                                onNavigateTo(Screens.VIDEO_PLAYBACK)
-                                videosViewModel.onVideoClick(index)
-                            }
+                            Videos(
+                                videos = videosViewModel.state.videosSearchResult,
+                                imageLoader = videosViewModel.videoImageLoader,
+                                onVideoClicked = { video ->
+                                    onNavigateTo(Screens.VIDEO_PLAYBACK)
+                                    videosViewModel.onVideoClick(video)
+                                },
+                            )
                         }
                         1 -> {
                             FoldersScreen(videosViewModel.state.foldersSearchResult) {}
                         }
                         2 -> {
                             TaggedVideosScreen(
-                                videosViewModel.state.videos.getSubListIfNotEmpty(1, 6),
+                                videosViewModel.state.taggedVideosSearchResult,
+                                videosViewModel.state.allTags,
                                 videosViewModel.taggedVideoImageLoader,
-                            ) {}
+                                onVideoClicked = {},
+                                onApplyTag = { id, tags ->
+                                    videosViewModel.onTagVideo(id, tags)
+                                },
+                                onTagClicked = { tag ->
+                                    videosViewModel.addToFilterTags(tag)
+                                    videosViewModel.filterVideosWithTags()
+                                },
+                            )
                         }
                     }
                 },
@@ -195,19 +206,31 @@ fun MainScreen(
         ) { page ->
             when (page) {
                 0 -> {
-                    VideosScreen(videosViewModel.state.videos, videosViewModel.videoImageLoader) { index ->
+                    Videos(videosViewModel.state.videos, videosViewModel.videoImageLoader) { video ->
+                        videosViewModel.onVideoClick(video)
                         onNavigateTo(Screens.VIDEO_PLAYBACK)
-                        videosViewModel.onVideoClick(index)
                     }
                 }
                 1 -> {
-                    FoldersScreen(videosViewModel.state.folders) {}
+                    FoldersScreen(videosViewModel.state.folders) { folder: Folder ->
+                        onNavigateTo(Screens.VIDEOS)
+                        videosViewModel.onFolderClick(folder)
+                    }
                 }
                 2 -> {
                     TaggedVideosScreen(
-                        videosViewModel.state.videos.getSubListIfNotEmpty(1, 2),
+                        videosViewModel.state.taggedVideos,
+                        videosViewModel.state.allTags,
                         videosViewModel.taggedVideoImageLoader,
-                    ) {}
+                        onVideoClicked = {},
+                        onApplyTag = { id, tags ->
+                            videosViewModel.onTagVideo(id, tags)
+                        },
+                        onTagClicked = { tag ->
+                            videosViewModel.addToFilterTags(tag)
+                            videosViewModel.filterVideosWithTags()
+                        },
+                    )
                 }
             }
         }
