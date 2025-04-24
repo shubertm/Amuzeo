@@ -1,0 +1,64 @@
+name: Release
+on:
+    push:
+        tags:
+            - 'v*'
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup JDK 17
+              uses: actions/setup-java@v4
+              with:
+                  java-version: '17'
+                  distribution: 'adopt'
+
+            - name: Decode Keystore
+              run: |
+                  echo ${{ secrets.RELEASE_SIGNING_KEYSTORE }} > keystore.base64
+                  base64 -d keystore.base64 > ./app/amuzeo_release_keystore.jks
+
+            - name: Setup Gradle
+              uses: gradle/actions/setup-gradle@v4
+
+            - name: Build Release APK
+              env:
+                  SIGNING_KEYSTORE_PASS: ${{ secrets.SIGNING_KEYSTORE_PASS }}
+                  KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+                  KEY_PASS: ${{ secrets.KEY_PASS }}
+              run: |
+                  export VERSION_NAME=$(echo ${{ github.ref_name }} | rev | cut -d 'v' -f 1 | rev)
+                  ./gradlew assembleRelease
+
+            - name: Upload APK
+              uses: actions/upload-artifact@v4
+              with:
+                  name: amuzeo
+                  path: ./app/build/outputs/apk/release/*.apk
+
+            - name: Build Release AAB
+              env:
+                  SIGNING_KEYSTORE_PASS: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+                  KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+                  KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+              run: |
+                  export VERSION_NAME=$(echo ${{ github.ref_name }} | rev | cut -d 'v' -f 1 | rev)
+                  ./gradlew bundleRelease
+
+            - name: Upload AAB
+              uses: actions/upload-artifact@v4
+              with:
+                  name: amuzeo-bundle
+                  path: ./app/build/outputs/bundle/release/*.aab
+
+            - name: Create Release
+              run: |
+                  gh release create ${{ github.ref_name }} './app/build/outputs/apk/release/app-release.apk#Amuzeo' './app/build/outputs/bundle/release/app-release.aab#Amuzeo Bundle' --title "Amuzeo $(echo ${{ github.ref_name }} | rev | cut -d 'v' -f 1 | rev)" --generate-notes
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

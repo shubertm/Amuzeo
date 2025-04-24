@@ -22,8 +22,8 @@ jobs:
 
             - name: Decode Keystore
               run: |
-                  echo ${{ secrets.RELEASE_SIGNING_KEYSTORE }} > base64_keystore.txt
-                  base64 -d base64_keystore.txt > ./app/amuzeo_release_keystore.jks
+                  echo ${{ secrets.RELEASE_SIGNING_KEYSTORE }} > keystore.base64
+                  base64 -d keystore.base64 > ./app/amuzeo_release_keystore.jks
 
             - name: Build Debug APK
               run: ./gradlew assembleDebug
