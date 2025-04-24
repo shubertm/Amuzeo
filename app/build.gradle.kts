@@ -1,10 +1,22 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.gradle.ktlint)
 }
+
+val properties = Properties()
+val propertiesFile = rootProject.file("local.properties")
+
+if (propertiesFile.exists()) {
+    properties.load(propertiesFile.inputStream())
+}
+
+val signingKeyStorePass: String = properties.getProperty("key.store.pass")
+val keyPass: String = properties.getProperty("key.pass")
+val amuzeoKeyAlias: String = properties.getProperty("key.alias")
 
 android {
     namespace = "com.infbyte.amuzeo"
@@ -23,6 +35,18 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("amuzeo_release_keystore.jks")
+            storePassword = System.getenv("SIGNING_KEYSTORE_PASS") ?: signingKeyStorePass
+            keyAlias = System.getenv("KEY_ALIAS") ?: amuzeoKeyAlias
+            keyPassword = System.getenv("KEY_PASS") ?: keyPass
+
+            enableV1Signing = true
+            enableV2Signing = true
+        }
+    }
+
     buildTypes {
         debug {
             manifestPlaceholders.putAll(
@@ -35,7 +59,13 @@ android {
         }
 
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -47,6 +77,8 @@ android {
                     "appName" to "@string/app_name",
                 ),
             )
+
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
