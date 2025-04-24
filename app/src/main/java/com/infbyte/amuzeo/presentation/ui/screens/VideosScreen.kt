@@ -102,10 +102,7 @@ fun VideosScreen(
                 },
                 modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
                 content = {
-                    Videos(
-                        videosViewModel.state.videosSearchResult,
-                        videosViewModel.videoImageLoader,
-                    ) { video ->
+                    Videos(videosViewModel.state.videosSearchResult) { video ->
                         videosViewModel.onVideoClick(video)
                         onNavigateTo(Screens.VIDEO_PLAYBACK)
                     }
@@ -116,7 +113,7 @@ fun VideosScreen(
         Box(
             Modifier.padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
         ) {
-            Videos(videosViewModel.state.currentVideos, videosViewModel.videoImageLoader) { video ->
+            Videos(videosViewModel.state.currentVideos) { video ->
                 videosViewModel.onVideoClick(video)
                 onNavigateTo(Screens.VIDEO_PLAYBACK)
             }

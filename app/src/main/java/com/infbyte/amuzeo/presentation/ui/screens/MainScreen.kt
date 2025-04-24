@@ -108,7 +108,6 @@ fun MainScreen(
                         0 -> {
                             Videos(
                                 videos = videosViewModel.state.videosSearchResult,
-                                imageLoader = videosViewModel.videoImageLoader,
                                 onVideoClicked = { video ->
                                     onNavigateTo(Screens.VIDEO_PLAYBACK)
                                     videosViewModel.onVideoClick(video)
@@ -122,7 +121,6 @@ fun MainScreen(
                             TaggedVideosScreen(
                                 videosViewModel.state.taggedVideosSearchResult,
                                 videosViewModel.state.allTags,
-                                videosViewModel.taggedVideoImageLoader,
                                 onVideoClicked = {},
                                 onApplyTag = { id, tags ->
                                     videosViewModel.onTagVideo(id, tags)
@@ -206,7 +204,7 @@ fun MainScreen(
         ) { page ->
             when (page) {
                 0 -> {
-                    Videos(videosViewModel.state.videos, videosViewModel.videoImageLoader) { video ->
+                    Videos(videosViewModel.state.videos) { video ->
                         videosViewModel.onVideoClick(video)
                         onNavigateTo(Screens.VIDEO_PLAYBACK)
                     }
@@ -221,7 +219,6 @@ fun MainScreen(
                     TaggedVideosScreen(
                         videosViewModel.state.taggedVideos,
                         videosViewModel.state.allTags,
-                        videosViewModel.taggedVideoImageLoader,
                         onVideoClicked = {},
                         onApplyTag = { id, tags ->
                             videosViewModel.onTagVideo(id, tags)

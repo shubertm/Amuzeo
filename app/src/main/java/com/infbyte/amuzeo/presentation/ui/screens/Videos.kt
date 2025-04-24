@@ -1,6 +1,7 @@
 package com.infbyte.amuzeo.presentation.ui.screens
 
 import androidx.annotation.OptIn
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -27,8 +28,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
-import coil.ImageLoader
-import coil.compose.AsyncImage
 import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
 import com.infbyte.amuzeo.utils.format
@@ -37,14 +36,12 @@ import com.infbyte.amuzeo.utils.getVideoDuration
 @Composable
 fun Videos(
     videos: List<Video>,
-    imageLoader: ImageLoader,
     onVideoClicked: (Video) -> Unit = {},
 ) {
     LazyColumn(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         items(videos) { video ->
             Video(
                 video,
-                imageLoader,
                 onClick = { onVideoClicked(video) },
             )
         }
@@ -56,7 +53,6 @@ fun Videos(
 @Composable
 fun Video(
     video: Video = Video.EMPTY,
-    imageLoader: ImageLoader = ImageLoader(LocalContext.current),
     onClick: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -69,9 +65,8 @@ fun Video(
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AsyncImage(
-            model = video.thumbnailRequest,
-            imageLoader = imageLoader,
+        Image(
+            bitmap = video.thumbnail,
             contentDescription = "",
             modifier =
                 Modifier
@@ -102,6 +97,6 @@ fun Video(
 @Composable
 fun PreviewVideosScreen() {
     AmuzeoTheme {
-        Videos(listOf(Video.EMPTY, Video.EMPTY), ImageLoader(LocalContext.current), {})
+        Videos(listOf(Video.EMPTY, Video.EMPTY), {})
     }
 }
