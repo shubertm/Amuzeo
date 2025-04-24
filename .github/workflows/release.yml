@@ -44,9 +44,9 @@ jobs:
 
             - name: Build Release AAB
               env:
-                  SIGNING_KEYSTORE_PASS: ${{ secrets.SIGNING_KEYSTORE_PASSWORD }}
+                  SIGNING_KEYSTORE_PASS: ${{ secrets.SIGNING_KEYSTORE_PASS }}
                   KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-                  KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+                  KEY_PASS: ${{ secrets.KEY_PASS }}
               run: |
                   export VERSION_NAME=$(echo ${{ github.ref_name }} | rev | cut -d 'v' -f 1 | rev)
                   ./gradlew bundleRelease
