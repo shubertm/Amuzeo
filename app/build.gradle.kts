@@ -14,9 +14,9 @@ if (propertiesFile.exists()) {
     properties.load(propertiesFile.inputStream())
 }
 
-val signingKeyStorePass: String = properties.getProperty("key.store.pass")
-val keyPass: String = properties.getProperty("key.pass")
-val amuzeoKeyAlias: String = properties.getProperty("key.alias")
+val signingKeyStorePass: String? = properties.getProperty("key.store.pass")
+val keyPass: String? = properties.getProperty("key.pass")
+val amuzeoKeyAlias: String? = properties.getProperty("key.alias")
 
 android {
     namespace = "com.infbyte.amuzeo"
