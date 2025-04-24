@@ -1,5 +1,6 @@
 package com.infbyte.amuzeo.models
 
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.media3.common.MediaItem
 import coil.request.ImageRequest
 import dev.arkbuilders.arklib.ResourceId
@@ -10,6 +11,7 @@ data class Video(
     val item: MediaItem,
     val folder: String,
     val resourceId: ResourceId,
+    val thumbnail: ImageBitmap? = null,
     val thumbnailRequest: ImageRequest? = null,
 ) {
     val title = item.mediaMetadata.title.toString()

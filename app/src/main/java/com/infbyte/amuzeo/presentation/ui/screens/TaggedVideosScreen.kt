@@ -1,6 +1,7 @@
 package com.infbyte.amuzeo.presentation.ui.screens
 
 import androidx.annotation.OptIn
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +35,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import coil.ImageLoader
-import coil.compose.AsyncImage
 import com.infbyte.amuzeo.R
 import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
@@ -110,9 +110,8 @@ fun TaggedVideo(
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AsyncImage(
-            model = video.thumbnailRequest,
-            imageLoader = imageLoader,
+        Image(
+            video.thumbnail!!,
             contentDescription = "",
             modifier =
                 Modifier

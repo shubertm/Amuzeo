@@ -5,8 +5,10 @@ import android.content.Context
 import android.provider.MediaStore
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import coil.size.Size
 import com.infbyte.amuzeo.models.Folder
 import com.infbyte.amuzeo.models.Video
+import com.infbyte.amuzeo.utils.createVideoThumbnail
 import com.infbyte.amuzeo.utils.getImageLoader
 import com.infbyte.amuzeo.utils.getVideoThumbnailRequest
 import dev.arkbuilders.arklib.ResourceId
@@ -94,6 +96,8 @@ class VideosRepo(private val context: Context) {
                             .setMediaId(id.toString())
                             .build()
                     val thumbnailRequest = context.getVideoThumbnailRequest(songUri)
+                    val thumbnail = context.createVideoThumbnail(Path(path), android.util.Size(640, 480))
+
                     val videoPath = Path(path)
 
                     val size = videoPath.fileSize()
@@ -106,6 +110,7 @@ class VideosRepo(private val context: Context) {
                             item = item,
                             folder = extractFolderName(path),
                             resourceId = resourceId,
+                            thumbnail = thumbnail,
                             thumbnailRequest = thumbnailRequest,
                         )
 
