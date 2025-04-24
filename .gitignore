@@ -1,4 +1,6 @@
 *.iml
+*.jks
+*.aab
 .gradle
 /local.properties
 .idea

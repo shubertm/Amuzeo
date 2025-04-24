@@ -20,10 +20,19 @@ jobs:
             - name: Validate Gradle Wrapper
               uses: gradle/actions/wrapper-validation@v3
 
+            - name: Decode Keystore
+              run: |
+                  echo {{ secrets.RELEASE_SIGNING_KEYSTORE }} > base64_keystore.txt
+                  base64 -d base64_keystore.txt > ./app/amuzeo_release_keystore.jks
+
             - name: Build Debug APK
               run: ./gradlew assembleDebug
 
             - name: Build Release APK
+              env:
+                  SIGNING_KEYSTORE_PASS: ${{ secrets.SIGNING_KEYSTORE_PASS }}
+                  KEY_PASS: ${{ secrets.KEY_PASS }}
+                  KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
               run: ./gradlew assembleRelease
 
             - name: Upload Debug APK
