@@ -17,6 +17,7 @@ if (propertiesFile.exists()) {
 val signingKeyStorePass: String? = properties.getProperty("key.store.pass")
 val keyPass: String? = properties.getProperty("key.pass")
 val amuzeoKeyAlias: String? = properties.getProperty("key.alias")
+val localVersionName: String? = properties.getProperty("local.version.name")
 
 android {
     namespace = "com.infbyte.amuzeo"
@@ -27,7 +28,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = System.getenv("VERSION_NAME") ?: localVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
