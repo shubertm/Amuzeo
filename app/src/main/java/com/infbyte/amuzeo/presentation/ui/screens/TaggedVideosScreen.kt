@@ -1,6 +1,7 @@
 package com.infbyte.amuzeo.presentation.ui.screens
 
 import androidx.annotation.OptIn
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,8 +34,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
-import coil.ImageLoader
-import coil.compose.AsyncImage
 import com.infbyte.amuzeo.R
 import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
@@ -51,7 +50,6 @@ import dev.arkbuilders.arklib.user.tags.Tags
 fun TaggedVideosScreen(
     videos: List<Video>,
     allTags: Tags,
-    imageLoader: ImageLoader = ImageLoader(LocalContext.current),
     onVideoClicked: () -> Unit,
     onApplyTag: (ResourceId, Tags) -> Unit = { _, _ -> },
     onTagClicked: (Tag) -> Unit = {},
@@ -73,12 +71,11 @@ fun TaggedVideosScreen(
                             bottom = tagsHeight.toDp(),
                         ),
                         video,
-                        imageLoader,
                         onApplyTag = onApplyTag,
                     )
                     return@itemsIndexed
                 }
-                TaggedVideo(Modifier.padding(8.dp), video = video, imageLoader = imageLoader, onApplyTag = onApplyTag)
+                TaggedVideo(Modifier.padding(8.dp), video = video, onApplyTag = onApplyTag)
             }
         }
         Tags(
@@ -97,7 +94,6 @@ fun TaggedVideosScreen(
 fun TaggedVideo(
     modifier: Modifier = Modifier,
     video: Video = Video.EMPTY,
-    imageLoader: ImageLoader = ImageLoader(LocalContext.current),
     onApplyTag: (ResourceId, Tags) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
@@ -110,9 +106,8 @@ fun TaggedVideo(
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AsyncImage(
-            model = video.thumbnailRequest,
-            imageLoader = imageLoader,
+        Image(
+            bitmap = video.thumbnail,
             contentDescription = "",
             modifier =
                 Modifier
