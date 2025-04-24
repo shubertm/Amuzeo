@@ -1,6 +1,7 @@
 *.iml
 *.jks
 *.aab
+*.base64
 .gradle
 /local.properties
 .idea
