@@ -39,10 +39,10 @@ import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
 import com.infbyte.amuzeo.presentation.ui.dialogs.AddTagDialog
 import com.infbyte.amuzeo.presentation.ui.views.Tags
+import com.infbyte.amuzeo.repo.ContentId
 import com.infbyte.amuzeo.utils.format
 import com.infbyte.amuzeo.utils.getVideoDuration
 import com.infbyte.amuzeo.utils.toDp
-import dev.arkbuilders.arklib.ResourceId
 import dev.arkbuilders.arklib.user.tags.Tag
 import dev.arkbuilders.arklib.user.tags.Tags
 
@@ -51,7 +51,7 @@ fun TaggedVideosScreen(
     videos: List<Video>,
     allTags: Tags,
     onVideoClicked: () -> Unit,
-    onApplyTag: (ResourceId, Tags) -> Unit = { _, _ -> },
+    onApplyTag: (ContentId, Tags) -> Unit = { _, _ -> },
     onTagClicked: (Tag) -> Unit = {},
 ) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -94,7 +94,7 @@ fun TaggedVideosScreen(
 fun TaggedVideo(
     modifier: Modifier = Modifier,
     video: Video = Video.EMPTY,
-    onApplyTag: (ResourceId, Tags) -> Unit = { _, _ -> },
+    onApplyTag: (ContentId, Tags) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
     val videoUri = remember { video.item.localConfiguration?.uri }
@@ -144,7 +144,7 @@ fun TaggedVideo(
             onDismiss = { showTagDialog = false },
             onApplyTag = { tag ->
                 video.addTag(tag)
-                onApplyTag(video.resourceId, video.tags)
+                onApplyTag(video.contentId, video.tags)
             },
         )
     }
