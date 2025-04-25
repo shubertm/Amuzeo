@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
     build:
+        needs: [lint, ktlint]
         runs-on: ubuntu-latest
         environment: Development
         steps:
@@ -19,10 +20,22 @@ jobs:
             - name: Validate Gradle Wrapper
               uses: gradle/actions/wrapper-validation@v3
 
+            - name: Decode Keystore
+              run: |
+                  echo ${{ secrets.RELEASE_SIGNING_KEYSTORE }} > keystore.base64
+                  base64 -d keystore.base64 > ./app/amuzeo_release_keystore.jks
+
             - name: Build Debug APK
+              env:
+                  VERSION_NAME: ${{ github.ref_name }}-debug
               run: ./gradlew assembleDebug
 
             - name: Build Release APK
+              env:
+                  VERSION_NAME: ${{ github.ref_name }}-rc
+                  SIGNING_KEYSTORE_PASS: ${{ secrets.SIGNING_KEYSTORE_PASS }}
+                  KEY_PASS: ${{ secrets.KEY_PASS }}
+                  KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
               run: ./gradlew assembleRelease
 
             - name: Upload Debug APK
@@ -38,7 +51,6 @@ jobs:
                   path: ./app/build/outputs/apk/release/*.apk
 
     lint:
-        needs: build
         environment: Development
         runs-on: ubuntu-latest
         steps:
@@ -59,7 +71,6 @@ jobs:
                   path: ./app/build/reports/*.html
 
     ktlint:
-        needs: build
         environment: Development
         runs-on: ubuntu-latest
         steps:
