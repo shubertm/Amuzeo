@@ -2,26 +2,23 @@ package com.infbyte.amuzeo.models
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.media3.common.MediaItem
-import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.user.tags.Tag
-import dev.arkbuilders.arklib.user.tags.Tags
 
 data class Video(
     val item: MediaItem,
     val folder: String,
-    val resourceId: ResourceId,
+    val fileId: String,
     val thumbnail: ImageBitmap,
 ) {
     val title = item.mediaMetadata.title.toString()
 
-    private val _tags = mutableSetOf<Tag>()
-    val tags: Tags = _tags
+    private val _tags = mutableSetOf<String>()
+    val tags: Set<String> = _tags
 
-    fun addTag(tag: Tag) {
+    fun addTag(tag: String) {
         _tags.add(tag)
     }
 
-    fun addTags(tags: Tags) {
+    fun addTags(tags: Set<String>) {
         _tags.addAll(tags)
     }
 
@@ -30,7 +27,7 @@ data class Video(
             Video(
                 MediaItem.EMPTY.buildUpon().setUri("").build(),
                 "",
-                resourceId = ResourceId.fromString("0-0"),
+                fileId = "0",
                 ImageBitmap(10, 10),
             )
     }

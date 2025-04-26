@@ -20,15 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.arkbuilders.arklib.user.tags.Tag
-import dev.arkbuilders.arklib.user.tags.Tags
 
 @Preview
 @Composable
 fun BoxScope.Tags(
-    tags: Tags = emptySet(),
     modifier: Modifier = Modifier,
-    onTagClicked: (Tag) -> Unit = {},
+    tags: Set<String> = emptySet(),
+    onTagClicked: (String) -> Unit = {},
 ) {
     LazyRow(modifier.fillMaxWidth().align(Alignment.BottomCenter)) {
         items(tags.toList()) { tag ->

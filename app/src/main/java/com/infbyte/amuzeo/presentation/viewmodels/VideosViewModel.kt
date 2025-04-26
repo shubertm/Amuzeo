@@ -11,17 +11,14 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
-import coil.ImageLoader
 import com.infbyte.amuzeo.models.AmuzeoSideEffect
 import com.infbyte.amuzeo.models.AmuzeoState
 import com.infbyte.amuzeo.models.Folder
 import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.playback.AmuzeoPlayer
+import com.infbyte.amuzeo.repo.ContentId
 import com.infbyte.amuzeo.repo.TagsRepo
 import com.infbyte.amuzeo.repo.VideosRepo
-import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.user.tags.Tag
-import dev.arkbuilders.arklib.user.tags.Tags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -33,9 +30,6 @@ class VideosViewModel(
     private val tagsRepo: TagsRepo,
 ) : ViewModel() {
     val videoPlayer: Player? = amuzeoPlayer.getPlayer()
-
-    val videoImageLoader: ImageLoader = videosRepo.videoImageLoader
-    val taggedVideoImageLoader: ImageLoader = videosRepo.taggedVideoImageLoader
 
     var state by mutableStateOf(AmuzeoState.INITIAL_STATE)
         private set
@@ -58,24 +52,23 @@ class VideosViewModel(
                 isLoading = {
                     amuzeoPlayer.init()
                 },
-                onComplete = { videos, folders, ids ->
+                onComplete = { videos, folders ->
                     launch {
                         launch {
-                            tagsRepo.init(context.filesDir.toPath(), ids) { tags ->
-                                val taggedVideos =
-                                    videos.map { video ->
-                                        video.addTags(tags = tagsRepo.readTags(video.resourceId))
-                                        video
-                                    }
+                            tagsRepo.init(context.filesDir.toPath())
+                            val taggedVideos =
+                                videos.map { video ->
+                                    video.addTags(tags = tagsRepo.getTags(video.fileId))
+                                    video
+                                }
 
-                                state =
-                                    state.copy(
-                                        videos = taggedVideos,
-                                        allTags = tags,
-                                        taggedVideos = taggedVideos,
-                                        taggedVideosSearchResult = taggedVideos,
-                                    )
-                            }
+                            state =
+                                state.copy(
+                                    videos = taggedVideos,
+                                    allTags = tagsRepo.getTags(),
+                                    taggedVideos = taggedVideos,
+                                    taggedVideosSearchResult = taggedVideos,
+                                )
                         }
 
                         if (state.isRefreshing && videos.isEmpty()) {
@@ -162,21 +155,16 @@ class VideosViewModel(
     }
 
     fun onTagVideo(
-        id: ResourceId,
-        tags: Tags,
+        id: ContentId,
+        tags: Set<String>,
     ) {
         viewModelScope.launch {
-            tagsRepo.writeTags(id, tags)
-            state =
-                with(state) {
-                    val mutableTags = allTags.toMutableSet()
-                    mutableTags.addAll(tags)
-                    copy(allTags = mutableTags)
-                }
+            tagsRepo.setTags(id, tags)
+            state = state.copy(allTags = tagsRepo.getTags())
         }
     }
 
-    fun addToFilterTags(tag: Tag) {
+    fun addToFilterTags(tag: String) {
         state =
             with(state) {
                 val mutableTags = filterTags.toMutableSet()

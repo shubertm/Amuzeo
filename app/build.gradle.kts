@@ -125,13 +125,7 @@ dependencies {
     implementation(libs.io.insert.koin)
     implementation(libs.io.insert.koin.android)
 
-    implementation(libs.io.coil)
-    implementation(libs.io.coil.video)
-    implementation(libs.io.coil.compose)
-
     implementation(libs.com.infbyte.amuze)
-
-    implementation(libs.dev.arkbuilders.arklib)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

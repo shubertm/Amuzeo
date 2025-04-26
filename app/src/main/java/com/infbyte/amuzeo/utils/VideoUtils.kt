@@ -11,27 +11,10 @@ import android.os.Build
 import android.util.Size
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import coil.ImageLoader
-import coil.decode.VideoFrameDecoder
-import coil.memory.MemoryCache
-import coil.request.ImageRequest
 import java.nio.file.Path
 import kotlin.math.max
 
 typealias VideoDuration = Long
-
-fun Context.getImageLoader(): ImageLoader =
-    ImageLoader.Builder(this)
-        .memoryCache(MemoryCache.Builder(this).maxSizePercent(0.25).build())
-        .components {
-            add(VideoFrameDecoder.Factory())
-        }.build()
-
-fun Context.getVideoThumbnailRequest(mediaUri: Uri?): ImageRequest =
-    ImageRequest.Builder(this)
-        .data(mediaUri)
-        .size(200, 50)
-        .build()
 
 fun Context.getVideoDuration(uri: Uri?): VideoDuration {
     val metaRetriever = MediaMetadataRetriever()

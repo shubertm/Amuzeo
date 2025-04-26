@@ -9,20 +9,17 @@ import androidx.media3.common.MediaMetadata
 import com.infbyte.amuzeo.models.Folder
 import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.utils.createVideoThumbnail
-import com.infbyte.amuzeo.utils.getImageLoader
-import dev.arkbuilders.arklib.ResourceId
-import dev.arkbuilders.arklib.computeId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.io.path.Path
-import kotlin.io.path.fileSize
 
 class VideosRepo(private val context: Context) {
     private val _videos = mutableListOf<Video>()
     private val videos: List<Video> = _videos
     private var folders: List<Folder> = listOf()
-    private val resourceIds: MutableList<ResourceId> = mutableListOf()
+    private val contentIds: MutableList<String> = mutableListOf()
     private val _folderPaths: MutableList<Path> = mutableListOf()
     private val folderPaths: List<Path> = _folderPaths
     private val uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -38,12 +35,9 @@ class VideosRepo(private val context: Context) {
     private val selectionArgs = null
     private val sortOrder = null
 
-    val videoImageLoader = context.getImageLoader()
-    val taggedVideoImageLoader = context.getImageLoader()
-
     suspend fun loadVideos(
         isLoading: () -> Unit,
-        onComplete: (videos: List<Video>, folders: List<Folder>, ids: List<ResourceId>) -> Unit,
+        onComplete: (videos: List<Video>, folders: List<Folder>) -> Unit,
     ) {
         withContext(Dispatchers.IO) {
             isLoading()
@@ -94,18 +88,18 @@ class VideosRepo(private val context: Context) {
                             .setUri(songUri)
                             .setMediaId(id.toString())
                             .build()
-                    val videoPath = Path(path)
 
-                    val size = videoPath.fileSize()
-                    val resourceId = computeId(size, videoPath)
+                    val videoPath = Paths.get(path)
 
-                    resourceIds.add(resourceId)
+                    val fileId = videoPath.fileId()
+
+                    contentIds.add(fileId)
 
                     _videos +=
                         Video(
                             item = item,
                             folder = extractFolderName(path),
-                            resourceId = resourceId,
+                            fileId = fileId,
                             thumbnail = context.createVideoThumbnail(Path(path), Size(640, 480)),
                         )
 
@@ -114,7 +108,7 @@ class VideosRepo(private val context: Context) {
                 query.close()
             }
             loadFolders()
-            onComplete(videos, folders, resourceIds)
+            onComplete(videos, folders)
         }
     }
 
@@ -139,6 +133,6 @@ class VideosRepo(private val context: Context) {
     private fun extractFolderPath(path: String) = Path(path.substringBeforeLast('/'))
 
     companion object {
-        const val LOG_TAG = "Videos Repo"
+        private const val LOG_TAG = "Videos Repo"
     }
 }
