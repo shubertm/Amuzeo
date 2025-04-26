@@ -16,14 +16,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -31,7 +27,6 @@ import androidx.media3.common.util.UnstableApi
 import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
 import com.infbyte.amuzeo.utils.format
-import com.infbyte.amuzeo.utils.getVideoDuration
 
 @Composable
 fun Videos(
@@ -55,9 +50,6 @@ fun Video(
     video: Video = Video.EMPTY,
     onClick: () -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val videoUri = remember { video.item.localConfiguration?.uri }
-
     Row(
         Modifier.background(
             MaterialTheme.colorScheme.background,
@@ -83,12 +75,14 @@ fun Video(
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
             )
-            Text(
-                context.getVideoDuration(videoUri).format(),
-                style = MaterialTheme.typography.bodySmall,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
+            video.item.mediaMetadata.durationMs?.format()?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+            }
         }
     }
 }

@@ -58,7 +58,6 @@ fun MainScreen(
     }
 
     Scaffold(
-        Modifier.fillMaxSize(),
         topBar = {
             SearchBar(
                 inputField = {
@@ -102,7 +101,11 @@ fun MainScreen(
                         search()
                     }
                 },
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
+                modifier =
+                    Modifier.fillMaxWidth().padding(
+                        start = if (!videosViewModel.state.isSearching) 8.dp else 0.dp,
+                        end = if (!videosViewModel.state.isSearching) 8.dp else 0.dp,
+                    ),
                 content = {
                     when (pagerState.currentPage) {
                         0 -> {
@@ -199,8 +202,10 @@ fun MainScreen(
     ) { padding ->
         HorizontalPager(
             pagerState,
-            Modifier.padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
-            beyondViewportPageCount = 2,
+            Modifier.padding(
+                top = padding.calculateTopPadding(),
+                bottom = padding.calculateBottomPadding(),
+            ),
         ) { page ->
             when (page) {
                 0 -> {
