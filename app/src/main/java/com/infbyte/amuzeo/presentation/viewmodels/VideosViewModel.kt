@@ -107,14 +107,16 @@ class VideosViewModel(
     }
 
     fun onFolderClick(folder: Folder) {
-        state =
-            with(state) {
-                val videosInFolder =
-                    videos.filter { video ->
-                        video.folder == folder.name
-                    }
-                copy(currentVideos = videosInFolder)
-            }
+        viewModelScope.launch {
+            state =
+                with(state) {
+                    val videosInFolder =
+                        videos.filter { video ->
+                            video.folder == folder.name
+                        }
+                    copy(currentVideos = videosInFolder)
+                }
+        }
     }
 
     fun onPlayPauseClick() {
@@ -273,14 +275,12 @@ class VideosViewModel(
     fun onSearchVideos(query: String) {
         viewModelScope.launch {
             state =
-                with(state) {
-                    copy(
-                        videosSearchResult =
-                            currentVideos.filter { video ->
-                                video.title.contains(query, ignoreCase = true)
-                            },
-                    )
-                }
+                state.copy(
+                    videosSearchResult =
+                        state.currentVideos.filter { video ->
+                            video.title.contains(query, ignoreCase = true)
+                        },
+                )
         }
     }
 

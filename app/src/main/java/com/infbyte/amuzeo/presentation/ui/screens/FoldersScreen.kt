@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,7 +45,7 @@ fun Folder(
     onClick: () -> Unit = {},
 ) {
     Row(
-        Modifier.padding(8.dp).fillMaxWidth().clickable { onClick() },
+        Modifier.padding(8.dp).fillMaxWidth().clip(RoundedCornerShape(10)).clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(

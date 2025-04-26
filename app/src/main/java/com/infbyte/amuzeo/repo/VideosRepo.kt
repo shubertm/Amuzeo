@@ -4,11 +4,14 @@ import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
 import android.util.Size
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.util.UnstableApi
 import com.infbyte.amuzeo.models.Folder
 import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.utils.createVideoThumbnail
+import com.infbyte.amuzeo.utils.getVideoDuration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
@@ -35,6 +38,7 @@ class VideosRepo(private val context: Context) {
     private val selectionArgs = null
     private val sortOrder = null
 
+    @OptIn(UnstableApi::class)
     suspend fun loadVideos(
         isLoading: () -> Unit,
         onComplete: (videos: List<Video>, folders: List<Folder>) -> Unit,
@@ -67,7 +71,7 @@ class VideosRepo(private val context: Context) {
                     val title = it.getString(titleColumn)
                     val artist = it.getString(artistColumn)
                     val album = it.getString(albumColumn)
-                    val songUri =
+                    val videoUri =
                         ContentUris.withAppendedId(
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                             id,
@@ -80,12 +84,13 @@ class VideosRepo(private val context: Context) {
                             .setAlbumTitle(album)
                             .setArtist(artist)
                             .setTitle(title)
+                            .setDurationMs(context.getVideoDuration(videoUri))
                             .build()
 
                     val item =
                         MediaItem.Builder()
                             .setMediaMetadata(meta)
-                            .setUri(songUri)
+                            .setUri(videoUri)
                             .setMediaId(id.toString())
                             .build()
 
