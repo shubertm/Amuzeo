@@ -9,7 +9,6 @@ import androidx.media3.common.MediaMetadata
 import com.infbyte.amuzeo.models.Folder
 import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.utils.createVideoThumbnail
-import com.infbyte.amuzeo.utils.getImageLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
@@ -36,12 +35,9 @@ class VideosRepo(private val context: Context) {
     private val selectionArgs = null
     private val sortOrder = null
 
-    val videoImageLoader = context.getImageLoader()
-    val taggedVideoImageLoader = context.getImageLoader()
-
     suspend fun loadVideos(
         isLoading: () -> Unit,
-        onComplete: (videos: List<Video>, folders: List<Folder>, ids: List<String>) -> Unit,
+        onComplete: (videos: List<Video>, folders: List<Folder>) -> Unit,
     ) {
         withContext(Dispatchers.IO) {
             isLoading()
@@ -112,7 +108,7 @@ class VideosRepo(private val context: Context) {
                 query.close()
             }
             loadFolders()
-            onComplete(videos, folders, contentIds)
+            onComplete(videos, folders)
         }
     }
 
@@ -137,6 +133,6 @@ class VideosRepo(private val context: Context) {
     private fun extractFolderPath(path: String) = Path(path.substringBeforeLast('/'))
 
     companion object {
-        const val LOG_TAG = "Videos Repo"
+        private const val LOG_TAG = "Videos Repo"
     }
 }

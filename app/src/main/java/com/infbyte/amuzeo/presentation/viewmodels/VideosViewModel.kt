@@ -11,7 +11,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.Player
-import coil.ImageLoader
 import com.infbyte.amuzeo.models.AmuzeoSideEffect
 import com.infbyte.amuzeo.models.AmuzeoState
 import com.infbyte.amuzeo.models.Folder
@@ -31,9 +30,6 @@ class VideosViewModel(
     private val tagsRepo: TagsRepo,
 ) : ViewModel() {
     val videoPlayer: Player? = amuzeoPlayer.getPlayer()
-
-    val videoImageLoader: ImageLoader = videosRepo.videoImageLoader
-    val taggedVideoImageLoader: ImageLoader = videosRepo.taggedVideoImageLoader
 
     var state by mutableStateOf(AmuzeoState.INITIAL_STATE)
         private set
@@ -56,7 +52,7 @@ class VideosViewModel(
                 isLoading = {
                     amuzeoPlayer.init()
                 },
-                onComplete = { videos, folders, ids ->
+                onComplete = { videos, folders ->
                     launch {
                         launch {
                             tagsRepo.init(context.filesDir.toPath())
