@@ -3,7 +3,6 @@ package com.infbyte.amuzeo.repo
 import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
-import android.util.Log
 import android.util.Size
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -14,14 +13,14 @@ import com.infbyte.amuzeo.utils.getImageLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.io.path.Path
-import kotlin.io.path.inputStream
 
 class VideosRepo(private val context: Context) {
     private val _videos = mutableListOf<Video>()
     private val videos: List<Video> = _videos
     private var folders: List<Folder> = listOf()
-    private val resourceIds: MutableList<String> = mutableListOf()
+    private val contentIds: MutableList<String> = mutableListOf()
     private val _folderPaths: MutableList<Path> = mutableListOf()
     private val folderPaths: List<Path> = _folderPaths
     private val uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -94,21 +93,17 @@ class VideosRepo(private val context: Context) {
                             .setMediaId(id.toString())
                             .build()
 
-                    val bytes = byteArrayOf()
+                    val videoPath = Paths.get(path)
 
-                    Path(path).inputStream().read(bytes)
+                    val fileId = videoPath.fileId()
 
-                    val contentId = contentId(bytes)
-
-                    Log.d(LOG_TAG, "$path : $contentId")
-
-                    resourceIds.add(contentId)
+                    contentIds.add(fileId)
 
                     _videos +=
                         Video(
                             item = item,
                             folder = extractFolderName(path),
-                            contentId = contentId,
+                            fileId = fileId,
                             thumbnail = context.createVideoThumbnail(Path(path), Size(640, 480)),
                         )
 
@@ -117,7 +112,7 @@ class VideosRepo(private val context: Context) {
                 query.close()
             }
             loadFolders()
-            onComplete(videos, folders, resourceIds)
+            onComplete(videos, folders, contentIds)
         }
     }
 

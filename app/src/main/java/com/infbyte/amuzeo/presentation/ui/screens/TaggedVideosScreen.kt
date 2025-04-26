@@ -43,16 +43,14 @@ import com.infbyte.amuzeo.repo.ContentId
 import com.infbyte.amuzeo.utils.format
 import com.infbyte.amuzeo.utils.getVideoDuration
 import com.infbyte.amuzeo.utils.toDp
-import dev.arkbuilders.arklib.user.tags.Tag
-import dev.arkbuilders.arklib.user.tags.Tags
 
 @Composable
 fun TaggedVideosScreen(
     videos: List<Video>,
-    allTags: Tags,
+    allTags: Set<String>,
     onVideoClicked: () -> Unit,
-    onApplyTag: (ContentId, Tags) -> Unit = { _, _ -> },
-    onTagClicked: (Tag) -> Unit = {},
+    onApplyTag: (ContentId, Set<String>) -> Unit = { _, _ -> },
+    onTagClicked: (String) -> Unit = {},
 ) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         var tagsHeight by rememberSaveable { mutableStateOf(0) }
@@ -79,10 +77,10 @@ fun TaggedVideosScreen(
             }
         }
         Tags(
-            allTags,
             Modifier.onSizeChanged { size ->
                 tagsHeight = size.height
             },
+            allTags,
             onTagClicked = onTagClicked,
         )
     }
@@ -94,7 +92,7 @@ fun TaggedVideosScreen(
 fun TaggedVideo(
     modifier: Modifier = Modifier,
     video: Video = Video.EMPTY,
-    onApplyTag: (ContentId, Tags) -> Unit = { _, _ -> },
+    onApplyTag: (ContentId, Set<String>) -> Unit = { _, _ -> },
 ) {
     val context = LocalContext.current
     val videoUri = remember { video.item.localConfiguration?.uri }
@@ -144,7 +142,7 @@ fun TaggedVideo(
             onDismiss = { showTagDialog = false },
             onApplyTag = { tag ->
                 video.addTag(tag)
-                onApplyTag(video.contentId, video.tags)
+                onApplyTag(video.fileId, video.tags)
             },
         )
     }

@@ -1,7 +1,6 @@
 package com.infbyte.amuzeo.repo
 
 import android.util.Log
-import androidx.compose.ui.util.fastForEach
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.nio.file.Path
@@ -41,22 +40,15 @@ class TagsRepoImpl : TagsRepo {
     }
 
     override suspend fun getTags(contentIds: List<ContentId>): Set<String> {
-        val tags = mutableSetOf<String>()
-        contentIds.fastForEach { id ->
-            val tagsById = idToTags[id]
-            if (!tagsById.isNullOrEmpty()) {
-                tags.addAll(tagsById)
-            }
-        }
-        return tags
+        return contentIds.flatMap {
+            getTags(it)
+        }.toSet()
     }
 
     override suspend fun getTags(): Set<String> {
-        val tags = mutableSetOf<String>()
-        idToTags.values.forEach {
-            tags.addAll(it)
-        }
-        return tags
+        return idToTags.flatMap {
+            it.value
+        }.toSet()
     }
 
     private suspend fun writeTags() {
@@ -68,7 +60,7 @@ class TagsRepoImpl : TagsRepo {
 
             val lines =
                 idToTags.map { map ->
-                    "${map.key}:${map.value}"
+                    "${map.key}:${map.value.joinToString(",")}"
                 }
 
             Log.d(LOG_TAG, "Writing all applied tags")

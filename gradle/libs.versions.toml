@@ -16,7 +16,6 @@ coil = "2.7.0"
 material3 = "1.2.1"
 ktlintGradle = "12.1.1"
 amuze = "0.2.1"
-arkLibAndroid = "0.3.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,8 +50,6 @@ io-coil-video = { group = "io.coil-kt", name = "coil-video", version.ref = "coil
 io-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 com-infbyte-amuze = { group = "com.infbyte", name = "amuze", version.ref = "amuze" }
-
-dev-arkbuilders-arklib = { group = "dev.arkbuilders", name = "arklib", version.ref = "arkLibAndroid"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

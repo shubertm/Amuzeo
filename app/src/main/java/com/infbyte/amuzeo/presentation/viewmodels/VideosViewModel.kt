@@ -20,7 +20,6 @@ import com.infbyte.amuzeo.playback.AmuzeoPlayer
 import com.infbyte.amuzeo.repo.ContentId
 import com.infbyte.amuzeo.repo.TagsRepo
 import com.infbyte.amuzeo.repo.VideosRepo
-import dev.arkbuilders.arklib.user.tags.Tag
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -63,7 +62,7 @@ class VideosViewModel(
                             tagsRepo.init(context.filesDir.toPath())
                             val taggedVideos =
                                 videos.map { video ->
-                                    video.addTags(tags = tagsRepo.getTags(video.contentId))
+                                    video.addTags(tags = tagsRepo.getTags(video.fileId))
                                     video
                                 }
 
@@ -169,7 +168,7 @@ class VideosViewModel(
         }
     }
 
-    fun addToFilterTags(tag: Tag) {
+    fun addToFilterTags(tag: String) {
         state =
             with(state) {
                 val mutableTags = filterTags.toMutableSet()

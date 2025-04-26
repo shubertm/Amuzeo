@@ -131,8 +131,6 @@ dependencies {
 
     implementation(libs.com.infbyte.amuze)
 
-    implementation(libs.dev.arkbuilders.arklib)
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
