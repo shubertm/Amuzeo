@@ -51,9 +51,7 @@ fun Video(
     onClick: () -> Unit = {},
 ) {
     Row(
-        Modifier.background(
-            MaterialTheme.colorScheme.background,
-        ).padding(8.dp).fillMaxWidth().clip(RoundedCornerShape(10))
+        Modifier.padding(8.dp).fillMaxWidth().clip(RoundedCornerShape(10))
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
     ) {

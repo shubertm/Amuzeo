@@ -20,7 +20,7 @@ import kotlin.io.path.Path
 
 class VideosRepo(private val context: Context) {
     private val _videos = mutableListOf<Video>()
-    private val videos: List<Video> = _videos
+    val videos: List<Video> = _videos
     private var folders: List<Folder> = listOf()
     private val contentIds: MutableList<String> = mutableListOf()
     private val _folderPaths: MutableList<Path> = mutableListOf()
@@ -54,6 +54,7 @@ class VideosRepo(private val context: Context) {
                     selectionArgs,
                     sortOrder,
                 )
+            _videos.clear()
             query?.let {
                 val idColumn =
                     it.getColumnIndexOrThrow(MediaStore.Video.Media._ID)

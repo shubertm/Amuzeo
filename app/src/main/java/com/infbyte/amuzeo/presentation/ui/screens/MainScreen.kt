@@ -122,9 +122,12 @@ fun MainScreen(
                         }
                         2 -> {
                             TaggedVideosScreen(
-                                videosViewModel.state.taggedVideosSearchResult,
+                                videosViewModel.state.videosSearchResult,
                                 videosViewModel.state.allTags,
-                                onVideoClicked = {},
+                                onVideoClicked = { video ->
+                                    onNavigateTo(Screens.VIDEO_PLAYBACK)
+                                    videosViewModel.onVideoClick(video)
+                                },
                                 onApplyTag = { id, tags ->
                                     videosViewModel.onTagVideo(id, tags)
                                 },
@@ -222,9 +225,12 @@ fun MainScreen(
                 }
                 2 -> {
                     TaggedVideosScreen(
-                        videosViewModel.state.taggedVideos,
+                        videosViewModel.state.videos,
                         videosViewModel.state.allTags,
-                        onVideoClicked = {},
+                        onVideoClicked = { video ->
+                            onNavigateTo(Screens.VIDEO_PLAYBACK)
+                            videosViewModel.onVideoClick(video)
+                        },
                         onApplyTag = { id, tags ->
                             videosViewModel.onTagVideo(id, tags)
                         },
