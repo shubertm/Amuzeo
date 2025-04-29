@@ -19,6 +19,7 @@ import com.infbyte.amuze.ui.screens.AboutScreen
 import com.infbyte.amuze.ui.screens.LoadingScreen
 import com.infbyte.amuze.ui.screens.NoMediaAvailableScreen
 import com.infbyte.amuze.ui.screens.NoMediaPermissionScreen
+import com.infbyte.amuze.utils.GoogleMobileAdsConsentManager
 import com.infbyte.amuzeo.BuildConfig
 import com.infbyte.amuzeo.R
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
@@ -76,6 +77,7 @@ class MainActivity : ComponentActivity() {
                                     appVersion = BuildConfig.VERSION_NAME,
                                     appIconRes = R.drawable.amuzeo_foreground,
                                     privacyPolicyLinkRes = R.string.amuzeo_privacy_policy,
+                                    adsConsentManager = GoogleMobileAdsConsentManager(this),
                                     onNavigateBack = { navigateBack() },
                                 )
                             },
@@ -109,6 +111,7 @@ class MainActivity : ComponentActivity() {
                                     BuildConfig.VERSION_NAME,
                                     R.drawable.amuzeo_foreground,
                                     R.string.amuzeo_privacy_policy_link,
+                                    adsConsentManager = GoogleMobileAdsConsentManager(this),
                                     onNavigateBack = { navigateBack() },
                                 )
                             },
@@ -146,6 +149,7 @@ class MainActivity : ComponentActivity() {
                                 BuildConfig.VERSION_NAME,
                                 R.drawable.ic_amuzeo_splash,
                                 R.string.amuzeo_privacy_policy_link,
+                                adsConsentManager = GoogleMobileAdsConsentManager(this@MainActivity),
                             ) { navController.popBackStack() }
                         }
                     }
