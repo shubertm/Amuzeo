@@ -2,6 +2,7 @@ package com.infbyte.amuzeo.presentation.viewmodels
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,42 +55,32 @@ class VideosViewModel(
                 },
                 onComplete = { videos, folders ->
                     launch {
-                        launch {
-                            tagsRepo.init(context.filesDir.toPath())
-                            val taggedVideos =
-                                videos.map { video ->
-                                    video.addTags(tags = tagsRepo.getTags(video.fileId))
-                                    video
-                                }
-
-                            state =
-                                state.copy(
-                                    videos = taggedVideos,
-                                    allTags = tagsRepo.getTags(),
-                                    taggedVideos = taggedVideos,
-                                    taggedVideosSearchResult = taggedVideos,
-                                )
-                        }
+                        tagsRepo.init(context.filesDir.toPath())
+                        val taggedVideos =
+                            videos.map { video ->
+                                video.addTags(tags = tagsRepo.getTags(video.fileId))
+                                video
+                            }
 
                         if (state.isRefreshing && videos.isEmpty()) {
                             delay(2000)
                         }
                         state =
                             state.copy(
-                                videos = videos,
-                                currentVideos = videos,
+                                videos = taggedVideos,
+                                currentVideos = taggedVideos,
                                 folders = folders,
-                                videosSearchResult = videos,
-                                taggedVideos = videos,
-                                taggedVideosSearchResult = videos,
+                                videosSearchResult = taggedVideos,
+                                allTags = tagsRepo.getTags(),
                                 foldersSearchResult = folders,
                                 isLoaded = true,
                                 hasVideos = videos.isNotEmpty(),
                                 isRefreshing = false,
                             )
+
                         sideEffect = sideEffect.copy(showSplash = false)
                         launch(Dispatchers.Main) {
-                            amuzeoPlayer.createPlaylist(videos.map { it.item })
+                            amuzeoPlayer.createPlaylist(state.videos.map { it.item })
                         }
                     }
                 },
@@ -98,11 +89,10 @@ class VideosViewModel(
     }
 
     fun onVideoClick(video: Video) {
-        if (state.currentVideo != video) {
-            state = state.copy(currentVideo = video)
-            amuzeoPlayer.createPlaylist(state.currentVideos.map { it.item })
-        }
+        state = state.copy(currentVideo = video, currentVideos = state.videos)
+        amuzeoPlayer.createPlaylist(state.currentVideos.map { it.item })
         val index = state.currentVideos.indexOf(video)
+        Log.d("ViewModel", "play")
         amuzeoPlayer.selectVideo(index)
     }
 
@@ -183,13 +173,13 @@ class VideosViewModel(
         state =
             with(state) {
                 if (filterTags.isEmpty()) {
-                    return@with copy(taggedVideos = videos)
+                    return@with copy(videos = videosRepo.videos)
                 }
                 val videos =
                     videos.filter { video: Video ->
                         video.tags.any { tag -> filterTags.contains(tag) }
                     }
-                copy(taggedVideos = videos)
+                copy(videos = videos)
             }
     }
 

@@ -7,8 +7,6 @@ data class AmuzeoState(
     val videosSearchResult: List<Video> = listOf(),
     val folders: List<Folder> = listOf(),
     val foldersSearchResult: List<Folder> = listOf(),
-    val taggedVideos: List<Video> = listOf(),
-    val taggedVideosSearchResult: List<Video> = listOf(),
     val allTags: Set<String> = emptySet(),
     val filterTags: Set<String> = emptySet(),
     val progress: Float = 0f,

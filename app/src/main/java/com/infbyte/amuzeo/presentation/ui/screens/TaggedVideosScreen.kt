@@ -3,6 +3,7 @@ package com.infbyte.amuzeo.presentation.ui.screens
 import androidx.annotation.OptIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,7 +46,7 @@ import com.infbyte.amuzeo.utils.toDp
 fun TaggedVideosScreen(
     videos: List<Video>,
     allTags: Set<String>,
-    onVideoClicked: () -> Unit,
+    onVideoClicked: (Video) -> Unit,
     onApplyTag: (ContentId, Set<String>) -> Unit = { _, _ -> },
     onTagClicked: (String) -> Unit = {},
 ) {
@@ -57,20 +58,17 @@ fun TaggedVideosScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             itemsIndexed(videos) { index, video ->
-                if (index == videos.size - 1) {
-                    TaggedVideo(
-                        Modifier.padding(
-                            start = 8.dp,
-                            end = 8.dp,
-                            top = 8.dp,
-                            bottom = tagsHeight.toDp(),
-                        ),
-                        video,
-                        onApplyTag = onApplyTag,
-                    )
-                    return@itemsIndexed
-                }
-                TaggedVideo(Modifier.padding(8.dp), video = video, onApplyTag = onApplyTag)
+                TaggedVideo(
+                    Modifier.padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        top = 8.dp,
+                        bottom = if (index == videos.size - 1) tagsHeight.toDp() else 8.dp,
+                    ),
+                    video,
+                    onClick = { onVideoClicked(video) },
+                    onApplyTag = onApplyTag,
+                )
             }
         }
         Tags(
@@ -89,13 +87,15 @@ fun TaggedVideosScreen(
 fun TaggedVideo(
     modifier: Modifier = Modifier,
     video: Video = Video.EMPTY,
+    onClick: () -> Unit = {},
     onApplyTag: (ContentId, Set<String>) -> Unit = { _, _ -> },
 ) {
     var showTagDialog by rememberSaveable { mutableStateOf(false) }
 
     Row(
         modifier
-            .background(MaterialTheme.colorScheme.background)
+            .clip(RoundedCornerShape(10))
+            .clickable { onClick() }
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
