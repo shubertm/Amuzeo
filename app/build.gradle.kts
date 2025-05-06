@@ -18,6 +18,9 @@ val signingKeyStorePass: String? = properties.getProperty("key.store.pass")
 val keyPass: String? = properties.getProperty("key.pass")
 val amuzeoKeyAlias: String? = properties.getProperty("key.alias")
 val localVersionName: String? = properties.getProperty("local.version.name")
+val amuzeoVersionCode: Int =
+    properties.getProperty("local.version.code")?.toInt()
+        ?: System.getenv("RELEASES")?.toInt() ?: 0
 
 android {
     namespace = "com.infbyte.amuzeo"
@@ -27,7 +30,7 @@ android {
         applicationId = "com.infbyte.amuzeo"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
+        versionCode = amuzeoVersionCode + 1
         versionName = System.getenv("VERSION_NAME") ?: localVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
