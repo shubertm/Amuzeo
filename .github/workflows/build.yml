@@ -28,7 +28,10 @@ jobs:
             - name: Build Debug APK
               env:
                   VERSION_NAME: ${{ github.ref_name }}-debug
-              run: ./gradlew assembleDebug
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                export RELEASES=$(gh release ls | wc -l)
+                ./gradlew assembleDebug
 
             - name: Build Release APK
               env:
@@ -36,7 +39,10 @@ jobs:
                   SIGNING_KEYSTORE_PASS: ${{ secrets.SIGNING_KEYSTORE_PASS }}
                   KEY_PASS: ${{ secrets.KEY_PASS }}
                   KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-              run: ./gradlew assembleRelease
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                export RELEASES=$(gh release ls | wc -l)
+                ./gradlew assembleRelease
 
             - name: Upload Debug APK
               uses: actions/upload-artifact@v4
