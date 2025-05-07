@@ -7,9 +7,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
@@ -45,27 +47,27 @@ class MainActivity : ComponentActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
-
-        if (!videosViewModel.state.isLoaded) {
-            videosViewModel.setReadPermGranted(isReadPermissionGranted(this))
-            if (!videosViewModel.state.isReadPermGranted) {
-                launchPermRequest()
-            } else {
-                videosViewModel.init(this)
-            }
-        }
-
-        installSplashScreen().setKeepOnScreenCondition {
-            videosViewModel.sideEffect.showSplash
-        }
-
         setContent {
             AmuzeoTheme {
-                Surface(color = MaterialTheme.colorScheme.background) {
+                LaunchedEffect("") {
+                    if (!videosViewModel.state.isLoaded) {
+                        videosViewModel.setReadPermGranted(isReadPermissionGranted(this@MainActivity))
+                        if (!videosViewModel.state.isReadPermGranted) {
+                            launchPermRequest()
+                        } else {
+                            videosViewModel.init(this@MainActivity)
+                        }
+                    }
+                }
+
+                Surface(
+                    Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
                     val navController = rememberNavController()
                     if (!videosViewModel.state.isReadPermGranted) {
-                        videosViewModel.hideSystemBars(LocalView.current)
                         NoMediaPermissionScreen(
                             appIcon = R.drawable.amuzeo_intro,
                             action = R.string.amuzeo_watch,
@@ -89,7 +91,7 @@ class MainActivity : ComponentActivity() {
                         (videosViewModel.state.isReadPermGranted && !videosViewModel.state.isLoaded) ||
                         videosViewModel.state.isRefreshing
                     ) {
-                        LoadingScreen()
+                        LoadingScreen(stringResource(R.string.amuzeo_preparing))
                         return@Surface
                     }
 
