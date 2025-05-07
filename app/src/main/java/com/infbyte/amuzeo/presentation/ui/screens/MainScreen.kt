@@ -124,7 +124,10 @@ fun MainScreen(
                             )
                         }
                         1 -> {
-                            FoldersScreen(videosViewModel.state.foldersSearchResult) {}
+                            FoldersScreen(videosViewModel.state.foldersSearchResult) { folder ->
+                                onNavigateTo(Screens.VIDEOS)
+                                videosViewModel.onFolderClick(folder)
+                            }
                         }
                         2 -> {
                             TaggedVideosScreen(
