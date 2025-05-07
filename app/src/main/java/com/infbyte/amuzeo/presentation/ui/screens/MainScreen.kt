@@ -120,6 +120,8 @@ fun MainScreen(
                                 onVideoClicked = { video ->
                                     onNavigateTo(Screens.VIDEO_PLAYBACK)
                                     videosViewModel.onVideoClick(video)
+                                    videosViewModel.setIsSearching(false)
+                                    searchQuery = ""
                                 },
                             )
                         }
@@ -127,6 +129,8 @@ fun MainScreen(
                             FoldersScreen(videosViewModel.state.foldersSearchResult) { folder ->
                                 onNavigateTo(Screens.VIDEOS)
                                 videosViewModel.onFolderClick(folder)
+                                videosViewModel.setIsSearching(false)
+                                searchQuery = ""
                             }
                         }
                         2 -> {
@@ -136,6 +140,8 @@ fun MainScreen(
                                 onVideoClicked = { video ->
                                     onNavigateTo(Screens.VIDEO_PLAYBACK)
                                     videosViewModel.onVideoClick(video)
+                                    videosViewModel.setIsSearching(false)
+                                    searchQuery = ""
                                 },
                                 onApplyTag = { id, tags ->
                                     videosViewModel.onTagVideo(id, tags)
