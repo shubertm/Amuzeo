@@ -22,6 +22,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,7 +55,12 @@ fun MainScreen(
         when (pagerState.currentPage) {
             0 -> videosViewModel.onSearchVideos(searchQuery)
             1 -> videosViewModel.onSearchFolders(searchQuery)
+            2 -> videosViewModel.onSearchVideos(searchQuery)
         }
+    }
+
+    LaunchedEffect(pagerState.currentPage == 0, pagerState.currentPage == 2) {
+        videosViewModel.onNavigateToVideos()
     }
 
     Scaffold(

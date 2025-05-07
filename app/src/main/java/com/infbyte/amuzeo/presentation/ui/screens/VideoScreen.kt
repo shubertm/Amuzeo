@@ -1,7 +1,6 @@
 package com.infbyte.amuzeo.presentation.ui.screens
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -125,10 +124,7 @@ fun VideoScreen(
             .background(MaterialTheme.colorScheme.scrim)
             .pointerInput("") {
                 awaitEachGesture {
-                    Log.d("VideoScreen", "Gesture Screen touched")
-
                     if (awaitFirstDown().pressed) {
-                        Log.d("VideoScreen", "Screen touched")
                         videosViewModel.run {
                             cancelDelayHidingUi()
                             if (state.isUiVisible) {
