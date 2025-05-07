@@ -16,4 +16,5 @@
     <string name="amuzeo_tag">Tag</string>
     <string name="amuzeo_apply">Apply</string>
     <string name="amuzeo_cancel">Cancel</string>
+    <string name="amuzeo_preparing">Preparing your videos...</string>
 </resources>
