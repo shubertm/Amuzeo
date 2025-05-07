@@ -14,7 +14,7 @@ navigation = "2.5.3"
 koin = "3.5.6"
 material3 = "1.3.2"
 ktlintGradle = "12.1.1"
-amuze = "0.2.3"
+amuze = "0.2.4-a"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
