@@ -22,6 +22,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,7 +55,12 @@ fun MainScreen(
         when (pagerState.currentPage) {
             0 -> videosViewModel.onSearchVideos(searchQuery)
             1 -> videosViewModel.onSearchFolders(searchQuery)
+            2 -> videosViewModel.onSearchVideos(searchQuery)
         }
+    }
+
+    LaunchedEffect(pagerState.currentPage == 0, pagerState.currentPage == 2) {
+        videosViewModel.onNavigateToVideos()
     }
 
     Scaffold(
@@ -114,11 +120,18 @@ fun MainScreen(
                                 onVideoClicked = { video ->
                                     onNavigateTo(Screens.VIDEO_PLAYBACK)
                                     videosViewModel.onVideoClick(video)
+                                    videosViewModel.setIsSearching(false)
+                                    searchQuery = ""
                                 },
                             )
                         }
                         1 -> {
-                            FoldersScreen(videosViewModel.state.foldersSearchResult) {}
+                            FoldersScreen(videosViewModel.state.foldersSearchResult) { folder ->
+                                onNavigateTo(Screens.VIDEOS)
+                                videosViewModel.onFolderClick(folder)
+                                videosViewModel.setIsSearching(false)
+                                searchQuery = ""
+                            }
                         }
                         2 -> {
                             TaggedVideosScreen(
@@ -127,6 +140,8 @@ fun MainScreen(
                                 onVideoClicked = { video ->
                                     onNavigateTo(Screens.VIDEO_PLAYBACK)
                                     videosViewModel.onVideoClick(video)
+                                    videosViewModel.setIsSearching(false)
+                                    searchQuery = ""
                                 },
                                 onApplyTag = { id, tags ->
                                     videosViewModel.onTagVideo(id, tags)

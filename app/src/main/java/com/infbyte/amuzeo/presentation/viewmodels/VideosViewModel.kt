@@ -2,7 +2,6 @@ package com.infbyte.amuzeo.presentation.viewmodels
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -92,7 +91,6 @@ class VideosViewModel(
         state = state.copy(currentVideo = video, currentVideos = state.videos)
         amuzeoPlayer.createPlaylist(state.currentVideos.map { it.item })
         val index = state.currentVideos.indexOf(video)
-        Log.d("ViewModel", "play")
         amuzeoPlayer.selectVideo(index)
     }
 
@@ -104,7 +102,7 @@ class VideosViewModel(
                         videos.filter { video ->
                             video.folder == folder.name
                         }
-                    copy(currentVideos = videosInFolder)
+                    copy(videos = videosInFolder)
                 }
         }
     }
@@ -285,6 +283,12 @@ class VideosViewModel(
                             },
                     )
                 }
+        }
+    }
+
+    fun onNavigateToVideos() {
+        viewModelScope.launch {
+            state = state.copy(videos = videosRepo.videos)
         }
     }
 

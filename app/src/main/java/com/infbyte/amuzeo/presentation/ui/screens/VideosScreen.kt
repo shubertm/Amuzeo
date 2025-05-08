@@ -99,7 +99,11 @@ fun VideosScreen(
                         search()
                     }
                 },
-                modifier = Modifier.fillMaxWidth().padding(start = 8.dp, end = 8.dp),
+                modifier =
+                    Modifier.fillMaxWidth().padding(
+                        start = if (!videosViewModel.state.isSearching) 8.dp else 0.dp,
+                        end = if (!videosViewModel.state.isSearching) 8.dp else 0.dp,
+                    ),
                 content = {
                     Videos(videosViewModel.state.videosSearchResult) { video ->
                         videosViewModel.onVideoClick(video)
@@ -112,7 +116,7 @@ fun VideosScreen(
         Box(
             Modifier.padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding()),
         ) {
-            Videos(videosViewModel.state.currentVideos) { video ->
+            Videos(videosViewModel.state.videos) { video ->
                 videosViewModel.onVideoClick(video)
                 onNavigateTo(Screens.VIDEO_PLAYBACK)
             }
