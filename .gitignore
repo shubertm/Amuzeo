@@ -11,3 +11,5 @@
 .cxx
 local.properties
 github.properties
+/app/release/screenshots/app_store_custom
+/app/release/release
