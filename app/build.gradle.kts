@@ -29,12 +29,12 @@ val admobAppId: String? = properties.getProperty("admob.app.id")
 
 android {
     namespace = "com.infbyte.amuzeo"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.infbyte.amuzeo"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = amuzeoVersionCode + 1
         versionName = System.getenv("VERSION_NAME") ?: localVersionName
 
