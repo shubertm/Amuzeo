@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
+import com.infbyte.amuzeo.presentation.ui.views.FullBannerAdView
 import com.infbyte.amuzeo.utils.format
 
 @Composable
@@ -34,6 +35,10 @@ fun Videos(
     onVideoClicked: (Video) -> Unit = {},
 ) {
     LazyColumn(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        item {
+            FullBannerAdView()
+        }
+
         items(videos) { video ->
             Video(
                 video,

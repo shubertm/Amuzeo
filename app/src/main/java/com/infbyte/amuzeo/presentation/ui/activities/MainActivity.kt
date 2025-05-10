@@ -15,9 +15,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.android.gms.ads.MobileAds
 import com.infbyte.amuze.ui.screens.AboutScreen
 import com.infbyte.amuze.ui.screens.LoadingScreen
 import com.infbyte.amuze.ui.screens.NoMediaAvailableScreen
@@ -32,10 +34,17 @@ import com.infbyte.amuzeo.presentation.ui.screens.VideoScreen
 import com.infbyte.amuzeo.presentation.ui.screens.VideosScreen
 import com.infbyte.amuzeo.presentation.viewmodels.VideosViewModel
 import com.infbyte.amuzeo.utils.AmuzeoPermissions.isReadPermissionGranted
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.concurrent.atomic.AtomicBoolean
 
 class MainActivity : ComponentActivity() {
     private val videosViewModel: VideosViewModel by viewModel()
+
+    private lateinit var googleMobileAdsConsentManager: GoogleMobileAdsConsentManager
+
+    private val isMobileAdsInitialized = AtomicBoolean(false)
 
     private val permLauncher =
         registerForActivityResult(
@@ -54,6 +63,18 @@ class MainActivity : ComponentActivity() {
         setContent {
             AmuzeoTheme {
                 LaunchedEffect("") {
+                    googleMobileAdsConsentManager = GoogleMobileAdsConsentManager(this@MainActivity)
+
+                    googleMobileAdsConsentManager.checkConsent(this@MainActivity) {
+                        if (googleMobileAdsConsentManager.canRequestAds) {
+                            initMobileAds()
+                        }
+                    }
+
+                    if (googleMobileAdsConsentManager.canRequestAds) {
+                        initMobileAds()
+                    }
+
                     if (!videosViewModel.state.isLoaded) {
                         videosViewModel.setReadPermGranted(isReadPermissionGranted(this@MainActivity))
                         if (!videosViewModel.state.isReadPermGranted) {
@@ -81,7 +102,7 @@ class MainActivity : ComponentActivity() {
                                     appVersion = BuildConfig.VERSION_NAME,
                                     appIconRes = R.drawable.amuzeo_foreground,
                                     privacyPolicyLinkRes = R.string.amuzeo_privacy_policy,
-                                    adsConsentManager = GoogleMobileAdsConsentManager(this),
+                                    adsConsentManager = googleMobileAdsConsentManager,
                                     onNavigateBack = { navigateBack() },
                                 )
                             },
@@ -115,7 +136,7 @@ class MainActivity : ComponentActivity() {
                                     BuildConfig.VERSION_NAME,
                                     R.drawable.amuzeo_foreground,
                                     R.string.amuzeo_privacy_policy_link,
-                                    adsConsentManager = GoogleMobileAdsConsentManager(this),
+                                    adsConsentManager = googleMobileAdsConsentManager,
                                     onNavigateBack = { navigateBack() },
                                 )
                             },
@@ -153,7 +174,7 @@ class MainActivity : ComponentActivity() {
                                 BuildConfig.VERSION_NAME,
                                 R.drawable.ic_amuzeo_splash,
                                 R.string.amuzeo_privacy_policy_link,
-                                adsConsentManager = GoogleMobileAdsConsentManager(this@MainActivity),
+                                adsConsentManager = googleMobileAdsConsentManager,
                             ) { navController.popBackStack() }
                         }
                     }
@@ -176,6 +197,13 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         if (isFinishing) {
             videosViewModel.onExitApp()
+        }
+    }
+
+    private fun initMobileAds() {
+        if (isMobileAdsInitialized.getAndSet(true)) return
+        lifecycleScope.launch(Dispatchers.IO) {
+            MobileAds.initialize(this@MainActivity)
         }
     }
 

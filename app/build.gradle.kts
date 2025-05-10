@@ -4,6 +4,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.gradle.ktlint)
 }
 
@@ -21,6 +22,12 @@ val localVersionName: String? = properties.getProperty("local.version.name")
 val amuzeoVersionCode: Int =
     properties.getProperty("local.version.code")?.toInt()
         ?: System.getenv("RELEASES")?.toInt() ?: 0
+
+val testBannerAdUnitId: String? = properties.getProperty("test.banner.ad.unit.id")
+val testNativeAdUnitId: String? = properties.getProperty("test.native.ad.unit.id")
+val bannerAdUnitId: String? = properties.getProperty("banner.ad.unit.id")
+val nativeAdUnitId: String? = properties.getProperty("native.ad.unit.id")
+val admobAppId: String? = properties.getProperty("admob.app.id")
 
 android {
     namespace = "com.infbyte.amuzeo"
@@ -53,6 +60,10 @@ android {
 
     buildTypes {
         debug {
+            resValue("string", "banner_ad_unit_id", System.getenv("TEST_BANNER_AD_UNIT_ID") ?: "$testBannerAdUnitId")
+            resValue("string", "native_ad_unit_id", System.getenv("TEST_NATIVE_AD_UNIT_ID") ?: "$testNativeAdUnitId")
+            resValue("string", "admob_app_id", System.getenv("ADMOB_APP_ID") ?: "$admobAppId")
+
             manifestPlaceholders.putAll(
                 arrayOf(
                     "appIcon" to "@mipmap/amuzeo_debug",
@@ -74,6 +85,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            resValue("string", "admob_app_id", System.getenv("ADMOB_APP_ID") ?: "$admobAppId")
+            resValue("string", "banner_ad_unit_id", System.getenv("BANNER_AD_UNIT_ID") ?: "$bannerAdUnitId")
+            resValue("string", "native_ad_unit_id", System.getenv("NATIVE_AD_UNIT_ID") ?: "$nativeAdUnitId")
+
             manifestPlaceholders.putAll(
                 arrayOf(
                     "appIcon" to "@mipmap/amuzeo",
@@ -95,9 +111,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
@@ -129,6 +142,8 @@ dependencies {
     implementation(libs.io.insert.koin.android)
 
     implementation(libs.com.infbyte.amuze)
+
+    implementation(libs.google.mobile.ads)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
