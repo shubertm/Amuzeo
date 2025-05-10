@@ -4,6 +4,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.gradle.ktlint)
 }
 
@@ -22,14 +23,18 @@ val amuzeoVersionCode: Int =
     properties.getProperty("local.version.code")?.toInt()
         ?: System.getenv("RELEASES")?.toInt() ?: 0
 
+val testBannerAdUnitId: String? = properties.getProperty("test.banner.ad.unit.id")
+val bannerAdUnitId: String? = properties.getProperty("banner.ad.unit.id")
+val admobAppId: String? = properties.getProperty("admob.app.id")
+
 android {
     namespace = "com.infbyte.amuzeo"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.infbyte.amuzeo"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = amuzeoVersionCode + 1
         versionName = System.getenv("VERSION_NAME") ?: localVersionName
 
@@ -53,6 +58,9 @@ android {
 
     buildTypes {
         debug {
+            resValue("string", "banner_ad_unit_id", System.getenv("TEST_BANNER_AD_UNIT_ID") ?: "$testBannerAdUnitId")
+            resValue("string", "admob_app_id", System.getenv("ADMOB_APP_ID") ?: "$admobAppId")
+
             manifestPlaceholders.putAll(
                 arrayOf(
                     "appIcon" to "@mipmap/amuzeo_debug",
@@ -74,6 +82,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+
+            resValue("string", "admob_app_id", System.getenv("ADMOB_APP_ID") ?: "$admobAppId")
+            resValue("string", "banner_ad_unit_id", System.getenv("BANNER_AD_UNIT_ID") ?: "$bannerAdUnitId")
+
             manifestPlaceholders.putAll(
                 arrayOf(
                     "appIcon" to "@mipmap/amuzeo",
@@ -86,18 +98,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_21.toString()
     }
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
@@ -129,6 +138,8 @@ dependencies {
     implementation(libs.io.insert.koin.android)
 
     implementation(libs.com.infbyte.amuze)
+
+    implementation(libs.google.mobile.ads)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
