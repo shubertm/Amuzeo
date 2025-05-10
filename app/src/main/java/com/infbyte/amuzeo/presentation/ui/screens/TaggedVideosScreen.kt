@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,7 +19,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
 import com.infbyte.amuzeo.presentation.ui.dialogs.AddTagDialog
 import com.infbyte.amuzeo.presentation.ui.views.Tags
 import com.infbyte.amuzeo.repo.ContentId
+import com.infbyte.amuzeo.utils.accommodateFullBannerAds
 import com.infbyte.amuzeo.utils.format
 import com.infbyte.amuzeo.utils.toDp
 
@@ -57,14 +59,17 @@ fun TaggedVideosScreen(
             Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            itemsIndexed(videos) { index, video ->
+            accommodateFullBannerAds(videos, 4) { index, video ->
+                var width by remember { mutableIntStateOf(0) }
                 TaggedVideo(
                     Modifier.padding(
                         start = 8.dp,
                         end = 8.dp,
                         top = 8.dp,
                         bottom = if (index == videos.size - 1) tagsHeight.toDp() else 8.dp,
-                    ),
+                    ).onSizeChanged {
+                        width = it.width
+                    },
                     video,
                     onClick = { onVideoClicked(video) },
                     onApplyTag = onApplyTag,

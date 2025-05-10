@@ -21,7 +21,7 @@ fun FullBannerAdView() {
             factory = { context ->
                 AdView(context).apply {
                     adUnitId = context.getString(R.string.banner_ad_unit_id)
-                    setAdSize(AdSize.LARGE_BANNER)
+                    setAdSize(AdSize.FULL_BANNER)
                 }
             },
             update = { adView ->

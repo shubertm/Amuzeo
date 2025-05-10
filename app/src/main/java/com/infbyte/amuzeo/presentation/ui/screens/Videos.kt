@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import com.infbyte.amuzeo.models.Video
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
-import com.infbyte.amuzeo.presentation.ui.views.FullBannerAdView
+import com.infbyte.amuzeo.utils.accommodateFullBannerAds
 import com.infbyte.amuzeo.utils.format
 
 @Composable
@@ -35,11 +34,7 @@ fun Videos(
     onVideoClicked: (Video) -> Unit = {},
 ) {
     LazyColumn(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-        item {
-            FullBannerAdView()
-        }
-
-        items(videos) { video ->
+        accommodateFullBannerAds(videos, 4) { video ->
             Video(
                 video,
                 onClick = { onVideoClicked(video) },

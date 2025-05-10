@@ -24,9 +24,7 @@ val amuzeoVersionCode: Int =
         ?: System.getenv("RELEASES")?.toInt() ?: 0
 
 val testBannerAdUnitId: String? = properties.getProperty("test.banner.ad.unit.id")
-val testNativeAdUnitId: String? = properties.getProperty("test.native.ad.unit.id")
 val bannerAdUnitId: String? = properties.getProperty("banner.ad.unit.id")
-val nativeAdUnitId: String? = properties.getProperty("native.ad.unit.id")
 val admobAppId: String? = properties.getProperty("admob.app.id")
 
 android {
@@ -61,7 +59,6 @@ android {
     buildTypes {
         debug {
             resValue("string", "banner_ad_unit_id", System.getenv("TEST_BANNER_AD_UNIT_ID") ?: "$testBannerAdUnitId")
-            resValue("string", "native_ad_unit_id", System.getenv("TEST_NATIVE_AD_UNIT_ID") ?: "$testNativeAdUnitId")
             resValue("string", "admob_app_id", System.getenv("ADMOB_APP_ID") ?: "$admobAppId")
 
             manifestPlaceholders.putAll(
@@ -88,7 +85,6 @@ android {
 
             resValue("string", "admob_app_id", System.getenv("ADMOB_APP_ID") ?: "$admobAppId")
             resValue("string", "banner_ad_unit_id", System.getenv("BANNER_AD_UNIT_ID") ?: "$bannerAdUnitId")
-            resValue("string", "native_ad_unit_id", System.getenv("NATIVE_AD_UNIT_ID") ?: "$nativeAdUnitId")
 
             manifestPlaceholders.putAll(
                 arrayOf(
