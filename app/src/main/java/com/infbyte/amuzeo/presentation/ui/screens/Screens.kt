@@ -5,4 +5,6 @@ object Screens {
     const val VIDEOS: String = "videos-screen"
     const val VIDEO_PLAYBACK = "video-playback-screen"
     const val ABOUT = "about"
+    const val NO_PERMISSION = "no-permission"
+    const val NO_MEDIA = "no-media"
 }
