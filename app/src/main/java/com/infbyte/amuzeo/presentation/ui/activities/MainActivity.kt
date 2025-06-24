@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -20,11 +24,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.ads.MobileAds
+import com.infbyte.amuze.ads.GoogleMobileAdsConsentManager
 import com.infbyte.amuze.ui.screens.AboutScreen
 import com.infbyte.amuze.ui.screens.LoadingScreen
 import com.infbyte.amuze.ui.screens.NoMediaAvailableScreen
 import com.infbyte.amuze.ui.screens.NoMediaPermissionScreen
-import com.infbyte.amuze.utils.GoogleMobileAdsConsentManager
 import com.infbyte.amuzeo.BuildConfig
 import com.infbyte.amuzeo.R
 import com.infbyte.amuzeo.presentation.theme.AmuzeoTheme
@@ -90,25 +94,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background,
                 ) {
                     val navController = rememberNavController()
-                    if (!videosViewModel.state.isReadPermGranted) {
-                        NoMediaPermissionScreen(
-                            appIcon = R.drawable.amuzeo_intro,
-                            action = R.string.amuzeo_watch,
-                            onStartAction = { launchPermRequest() },
-                            onExit = { onExit() },
-                            aboutApp = { navigateBack ->
-                                AboutScreen(
-                                    appName = stringResource(R.string.app_name),
-                                    appVersion = BuildConfig.VERSION_NAME,
-                                    appIconRes = R.drawable.amuzeo_foreground,
-                                    privacyPolicyLinkRes = R.string.amuzeo_privacy_policy,
-                                    adsConsentManager = googleMobileAdsConsentManager,
-                                    onNavigateBack = { navigateBack() },
-                                )
-                            },
-                        )
-                        return@Surface
-                    }
+                    var initialScreen by rememberSaveable { mutableStateOf(Screens.MAIN) }
 
                     if (
                         (videosViewModel.state.isReadPermGranted && !videosViewModel.state.isLoaded) ||
@@ -118,33 +104,18 @@ class MainActivity : ComponentActivity() {
                         return@Surface
                     }
 
-                    if (!videosViewModel.state.hasVideos) {
-                        NoMediaAvailableScreen(
-                            R.string.amuzeo_no_videos,
-                            onRefresh = {
-                                if (!videosViewModel.state.isReadPermGranted) {
-                                    launchPermRequest()
-                                } else {
-                                    videosViewModel.setIsRefreshing(true)
-                                    videosViewModel.init(this)
-                                }
-                            },
-                            onExit = { onExit() },
-                            aboutApp = { navigateBack ->
-                                AboutScreen(
-                                    stringResource(R.string.app_name),
-                                    BuildConfig.VERSION_NAME,
-                                    R.drawable.amuzeo_foreground,
-                                    R.string.amuzeo_privacy_policy_link,
-                                    adsConsentManager = googleMobileAdsConsentManager,
-                                    onNavigateBack = { navigateBack() },
-                                )
-                            },
-                        )
-                        return@Surface
-                    }
+                    initialScreen =
+                        when {
+                            !videosViewModel.state.isReadPermGranted -> {
+                                Screens.NO_PERMISSION
+                            }
+                            !videosViewModel.state.hasVideos -> {
+                                Screens.NO_MEDIA
+                            }
+                            else -> Screens.MAIN
+                        }
 
-                    NavHost(navController, Screens.MAIN) {
+                    NavHost(navController, initialScreen) {
                         composable(Screens.MAIN) {
                             MainScreen(
                                 videosViewModel,
@@ -168,6 +139,32 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        composable(Screens.NO_PERMISSION) {
+                            NoMediaPermissionScreen(
+                                appIcon = R.drawable.amuzeo_intro,
+                                action = R.string.amuzeo_watch,
+                                onStartAction = { launchPermRequest() },
+                                onExit = { onExit() },
+                                aboutApp = { navController.navigate(Screens.ABOUT) },
+                            )
+                        }
+
+                        composable(Screens.NO_MEDIA) {
+                            NoMediaAvailableScreen(
+                                R.string.amuzeo_no_videos,
+                                onRefresh = {
+                                    if (!videosViewModel.state.isReadPermGranted) {
+                                        launchPermRequest()
+                                    } else {
+                                        videosViewModel.setIsRefreshing(true)
+                                        videosViewModel.init(this@MainActivity)
+                                    }
+                                },
+                                onExit = { onExit() },
+                                aboutApp = { navController.navigate(Screens.ABOUT) },
+                            )
+                        }
+
                         composable(Screens.ABOUT) {
                             AboutScreen(
                                 stringResource(R.string.app_name),
@@ -175,7 +172,7 @@ class MainActivity : ComponentActivity() {
                                 R.drawable.ic_amuzeo_splash,
                                 R.string.amuzeo_privacy_policy_link,
                                 adsConsentManager = googleMobileAdsConsentManager,
-                            ) { navController.popBackStack() }
+                            )
                         }
                     }
                 }

@@ -2,9 +2,11 @@
 *.jks
 *.aab
 *.base64
+*.json
 .gradle
 /local.properties
 .idea
+.kotlin
 /build
 /captures
 .externalNativeBuild
