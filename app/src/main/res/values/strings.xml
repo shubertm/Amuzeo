@@ -17,4 +17,5 @@
     <string name="amuzeo_apply">Apply</string>
     <string name="amuzeo_cancel">Cancel</string>
     <string name="amuzeo_preparing">Preparing your videos...</string>
+    <string name="amuzeo_perm_rationale">To play video, Amuzeo requires Video permisson.</string>
 </resources>

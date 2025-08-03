@@ -25,6 +25,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.ads.MobileAds
 import com.infbyte.amuze.ads.GoogleMobileAdsConsentManager
+import com.infbyte.amuze.contracts.AppSettingsContract
+import com.infbyte.amuze.ui.dialogs.AppSettingsRedirectDialog
 import com.infbyte.amuze.ui.screens.AboutScreen
 import com.infbyte.amuze.ui.screens.LoadingScreen
 import com.infbyte.amuze.ui.screens.NoMediaAvailableScreen
@@ -38,6 +40,7 @@ import com.infbyte.amuzeo.presentation.ui.screens.VideoScreen
 import com.infbyte.amuzeo.presentation.ui.screens.VideosScreen
 import com.infbyte.amuzeo.presentation.viewmodels.VideosViewModel
 import com.infbyte.amuzeo.utils.AmuzeoPermissions.isReadPermissionGranted
+import com.infbyte.amuzeo.utils.AmuzeoPermissions.showReqPermRationale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -56,6 +59,14 @@ class MainActivity : ComponentActivity() {
         ) { isGranted ->
             videosViewModel.setReadPermGranted(isGranted)
             if (isGranted) {
+                videosViewModel.init(this)
+            }
+        }
+
+    private val appSettingsLauncher =
+        registerForActivityResult(AppSettingsContract()) {
+            videosViewModel.setReadPermGranted(it)
+            if (it) {
                 videosViewModel.init(this)
             }
         }
@@ -104,6 +115,17 @@ class MainActivity : ComponentActivity() {
                         return@Surface
                     }
 
+                    if (videosViewModel.sideEffect.showAppSettingsDialog) {
+                        AppSettingsRedirectDialog(
+                            stringResource(R.string.amuzeo_perm_rationale),
+                            onAccept = {
+                                videosViewModel.hideAppSettingsRedirectDialog()
+                                appSettingsLauncher.launch(packageName)
+                            },
+                            onDismiss = { videosViewModel.hideAppSettingsRedirectDialog() },
+                        )
+                    }
+
                     initialScreen =
                         when {
                             !videosViewModel.state.isReadPermGranted -> {
@@ -143,7 +165,13 @@ class MainActivity : ComponentActivity() {
                             NoMediaPermissionScreen(
                                 appIcon = R.drawable.amuzeo_intro,
                                 action = R.string.amuzeo_watch,
-                                onStartAction = { launchPermRequest() },
+                                onStartAction = {
+                                    if (!showReqPermRationale()) {
+                                        videosViewModel.showAppSettingsRedirectDialog()
+                                        return@NoMediaPermissionScreen
+                                    }
+                                    launchPermRequest()
+                                },
                                 onExit = { onExit() },
                                 aboutApp = { navController.navigate(Screens.ABOUT) },
                             )

@@ -5,13 +5,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.media.MediaMetadataRetriever.OPTION_PREVIOUS_SYNC
-import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import android.util.Size
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import java.nio.file.Path
 import kotlin.math.max
 
 typealias VideoDuration = Long
@@ -26,67 +25,57 @@ fun Context.getVideoDuration(uri: Uri?): VideoDuration {
 }
 
 fun Context.createVideoThumbnail(
-    path: Path,
-    size: Size,
-): ImageBitmap {
-    val file = path.toFile()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        return ThumbnailUtils.createVideoThumbnail(
-            file,
-            size,
-            null,
-        ).asImageBitmap()
-    }
-    return createVideoThumbnail(Uri.fromFile(file), size)
-}
-
-fun Context.createVideoThumbnail(
     uri: Uri,
     size: Size,
-): ImageBitmap {
-    val metaRetriever = MediaMetadataRetriever()
-    metaRetriever.setDataSource(this, uri)
-    val thumbnailsBytes = metaRetriever.embeddedPicture
+): ImageBitmap? {
+    return try {
+        val metaRetriever = MediaMetadataRetriever()
+        metaRetriever.setDataSource(this, uri)
+        val thumbnailsBytes = metaRetriever.embeddedPicture
 
-    if (thumbnailsBytes != null) {
-        return BitmapFactory.decodeByteArray(thumbnailsBytes, 0, thumbnailsBytes.size).asImageBitmap()
-    }
-
-    val width =
-        metaRetriever.extractMetadata(
-            MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH,
-        )?.toFloat() ?: size.width.toFloat()
-    val height =
-        metaRetriever.extractMetadata(
-            MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT,
-        )?.toFloat() ?: size.height.toFloat()
-
-    val widthRatio = size.width.toFloat() / width
-    val heightRatio = size.height.toFloat() / height
-
-    val ratio = max(widthRatio, heightRatio)
-
-    if (ratio > 1) {
-        val reqWidth = width * ratio
-        val reqHeight = height * ratio
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val frame =
-                metaRetriever.getScaledFrameAtTime(
-                    -1,
-                    OPTION_PREVIOUS_SYNC,
-                    reqWidth.toInt(),
-                    reqHeight.toInt(),
-                )
-            metaRetriever.release()
-            return frame?.asImageBitmap()!!
+        if (thumbnailsBytes != null) {
+            return BitmapFactory.decodeByteArray(thumbnailsBytes, 0, thumbnailsBytes.size).asImageBitmap()
         }
-    }
 
-    // Should be scaled according to requested size
-    val frame = metaRetriever.frameAtTime
-    metaRetriever.release()
-    return frame?.asImageBitmap()!!
+        val width =
+            metaRetriever.extractMetadata(
+                MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH,
+            )?.toFloat() ?: size.width.toFloat()
+        val height =
+            metaRetriever.extractMetadata(
+                MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT,
+            )?.toFloat() ?: size.height.toFloat()
+
+        val widthRatio = size.width.toFloat() / width
+        val heightRatio = size.height.toFloat() / height
+
+        val ratio = max(widthRatio, heightRatio)
+
+        if (ratio > 1) {
+            val reqWidth = width * ratio
+            val reqHeight = height * ratio
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val frame =
+                    metaRetriever.getScaledFrameAtTime(
+                        -1,
+                        OPTION_PREVIOUS_SYNC,
+                        reqWidth.toInt(),
+                        reqHeight.toInt(),
+                    )
+                metaRetriever.release()
+                return frame?.asImageBitmap()!!
+            }
+        }
+
+        // Should be scaled according to requested size
+        val frame = metaRetriever.frameAtTime
+        metaRetriever.release()
+        frame?.asImageBitmap()
+    } catch (e: Exception) {
+        Log.e("Video Thumbnail", "Failed to create thumbnail with exception: $e")
+        null
+    }
 }
 
 fun VideoDuration.format(): String {

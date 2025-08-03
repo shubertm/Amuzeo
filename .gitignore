@@ -1,8 +1,10 @@
 *.iml
 *.jks
 *.aab
+*.aar
 *.base64
 *.json
+*/libs
 .gradle
 /local.properties
 .idea
