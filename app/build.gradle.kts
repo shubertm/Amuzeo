@@ -116,7 +116,7 @@ android {
 }
 
 dependencies {
-    implementation(fileTree("dir" to "./libs", "include" to arrayOf("*.aar")))
+    // implementation(fileTree("dir" to "./libs", "include" to arrayOf("*.aar")))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -137,7 +137,7 @@ dependencies {
     implementation(libs.io.insert.koin)
     implementation(libs.io.insert.koin.android)
 
-    // implementation(libs.com.infbyte.amuze)
+    implementation(libs.com.infbyte.amuze)
 
     implementation(libs.google.mobile.ads)
 
