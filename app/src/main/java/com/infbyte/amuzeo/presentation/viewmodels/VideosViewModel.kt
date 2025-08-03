@@ -297,4 +297,12 @@ class VideosViewModel(
             state = state.copy(searchQuery = query)
         }
     }
+
+    fun showAppSettingsRedirectDialog() {
+        sideEffect = sideEffect.copy(showAppSettingsDialog = true)
+    }
+
+    fun hideAppSettingsRedirectDialog() {
+        sideEffect = sideEffect.copy(showAppSettingsDialog = false)
+    }
 }

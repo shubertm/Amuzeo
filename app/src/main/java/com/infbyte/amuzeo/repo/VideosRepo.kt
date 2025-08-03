@@ -99,17 +99,21 @@ class VideosRepo(private val context: Context) {
 
                     val fileId = videoPath.fileId()
 
-                    contentIds.add(fileId)
+                    val thumbnail = context.createVideoThumbnail(videoUri, Size(640, 480))
 
-                    _videos +=
-                        Video(
-                            item = item,
-                            folder = extractFolderName(path),
-                            fileId = fileId,
-                            thumbnail = context.createVideoThumbnail(Path(path), Size(640, 480)),
-                        )
+                    if (thumbnail != null) {
+                        contentIds.add(fileId)
 
-                    _folderPaths.add(extractFolderPath(path))
+                        _videos +=
+                            Video(
+                                item = item,
+                                folder = extractFolderName(path),
+                                fileId = fileId,
+                                thumbnail = thumbnail,
+                            )
+
+                        _folderPaths.add(extractFolderPath(path))
+                    }
                 }
                 query.close()
             }

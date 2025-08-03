@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.gradle.ktlint)
 }
 
-val properties = Properties()
+val properties: Properties = Properties()
 val propertiesFile = rootProject.file("local.properties")
 
 if (propertiesFile.exists()) {
@@ -116,6 +116,7 @@ android {
 }
 
 dependencies {
+    // implementation(fileTree("dir" to "./libs", "include" to arrayOf("*.aar")))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
