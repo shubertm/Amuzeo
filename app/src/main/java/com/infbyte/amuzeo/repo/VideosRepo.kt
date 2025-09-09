@@ -121,7 +121,7 @@ class VideosRepo(private val context: Context) {
                 }
                 loadFolders()
                 onComplete(videos, folders)
-            } catch(e: Exception) {
+            } catch (e: Exception) {
                 Log.d(LOG_TAG, "loading videos failed with exception: $e")
             }
         }
